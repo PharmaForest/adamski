@@ -1,7 +1,7 @@
 # Admiral Functions List
 
 This list summarizes all derivation-related functions available in the R `{admiral}` package (approx. 58 functions), grouped by module.  
-These functions serve as a reference for creating equivalent SAS macros in the **ADaMSAS** package family.
+These functions serve as a reference for creating equivalent SAS macros in the **adamski** package family.
 
 ---
 
