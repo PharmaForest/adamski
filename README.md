@@ -1,3 +1,8 @@
+#adamski
+
+![adamski](./adamski.png)  
+
+
 # Admiral Functions List
 
 This list summarizes all derivation-related functions available in the R `{admiral}` package (approx. 58 functions), grouped by module.  
