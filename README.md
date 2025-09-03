@@ -1,4 +1,4 @@
-#adamski
+# adamski
 
 ![adamski](./adamski_logo_small.png)  
 
