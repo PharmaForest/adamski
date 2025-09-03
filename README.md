@@ -11,6 +11,7 @@ If you’re passionate about ADaM programming or want to help shape tools for th
 
 ![adamski](./adamski_logo_small.png)  
 
+---
 
 # Admiral Functions List
 
@@ -148,6 +149,14 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 ---
 ## Acknowledgment
 The package is inspired by the R `{admiral}` package and draws on some of their ideas and functions.
+
+---
+
+##  FAQ
+
+**Q. When will adamski be finished?**  
+**A.** adamski is always under construction 🏗️  
+> Like a never-ending construction site — always improving, never truly "done".
 
 ---
 
