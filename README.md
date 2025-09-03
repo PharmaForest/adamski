@@ -1,6 +1,6 @@
 #adamski
 
-![adamski](./adamski.png)  
+![adamski](./adamski_logo_small.png)  
 
 
 # Admiral Functions List
