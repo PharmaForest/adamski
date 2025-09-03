@@ -1,5 +1,13 @@
 # adamski package
-The package is inspired by the R `{admiral}` package and draws on some of their ideas and functions.
+
+
+The adamski package is currently under development to support ADaM creation.
+Let's build the spaceship [adamski] together! 🛰️
+
+Inspired by the admiral package in R, adamski aims to bring similar functionality — along with original functions and macros — to the SAS environment.
+
+We are looking for collaborators and contributors to join us on this exciting journey.
+If you’re passionate about ADaM programming or want to help shape tools for the clinical data community, we’d love to have you onboard! 🚀
 
 ![adamski](./adamski_logo_small.png)  
 
@@ -114,13 +122,6 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_param_wbc_abs()` | Add absolute WBC parameter | |
 | `derive_summary_records()` | Add summary records | |
 
----
-
-## adamski original
-
-| Function | Description | Status |
-|-----------|-------------|-------------|
-| `coming soon` | special macro(or function) | |
 
 ---
 ## ⏱️ TTE-specific (Time-to-Event)
@@ -131,10 +132,22 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 ---
 
+## adamski original
+
+| Function | Description | Status |
+|-----------|-------------|-------------|
+| `coming soon` | special macro(or function) | |
+
+---
+
 ## 📝 Usage Notes
 - This list reflects `{admiral}` derivation functions as of the current version.
 - Additional utility functions like `call_derivation()` or `restrict_derivation()` are **not included** here.
 - Naming convention: all derivation functions follow `derive_` or `derive_vars_` prefixes for consistency.
+
+---
+## Acknowledgment
+The package is inspired by the R `{admiral}` package and draws on some of their ideas and functions.
 
 ---
 
