@@ -37,7 +37,7 @@ run;
 ## %derive_var_merged_exist_flag()  
 
 ### Purpose:  
-    Creates a character flag variable indicating whether the current DATA step row's key(s) exist in another dataset.   
+   Creates a character flag variable indicating whether the current DATA step row's key(s) exist in another dataset.   
 
 ### Parameters:
 ~~~sas
@@ -87,13 +87,6 @@ data want;
 run;
 ~~~
 
-### Note:
-
-- Parameter `dataset` in {admiral} is not defined taking into account how the macro in SAS is used.  
-
-- Parameter `filter_add' is omitted because SAS's mechanism makes it difficult to differentiate it from the condition parameter. Records filtered by condition are the subject of evaluation.
-
-- Parameter  `missing_value` parameter has not been implemented at this time, as there are currently few practical use cases that come to mind.
 
 ### URL:
 
