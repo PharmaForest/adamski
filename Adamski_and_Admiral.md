@@ -155,6 +155,9 @@ Adamski is inspired by the R `{admiral}` package and draws on some of their idea
 **A.** adamski is always under construction 🏗️  
 > Like a never-ending construction site — always improving, never truly "done".
 
+**Q. How much are macros/functions in adamski consistent with functions in admiral?**  
+**A.** In general, macros/functions in adamski are consistent with those in admiral in names and parameters. However, some differences would exist based on the differences between how we use macros/functions in SAS and how functions in admiral are used in R.
+
 ---
 
 ## 🔗 Reference
