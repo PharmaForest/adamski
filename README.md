@@ -4,7 +4,7 @@ Adamski serves as a bridge between open-source R implementations and traditional
 
 ![adamski](./adamski_logo_small.png)  
 
-Please see more detailed concepts and construction map in [Adamski and Admiral](./adamski_and_admiral.md).
+Please see more detailed concepts and construction map in [Adamski and Admiral](./Adamski_and_Admiral.md).
 
 ---
 
