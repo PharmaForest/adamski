@@ -8,8 +8,6 @@ Inspired by {admiral} package in R, adamski aims to bring similar functionality 
 We are looking for collaborators and contributors to join us on this exciting journey.
 If you’re passionate about ADaM programming or want to help shape tools for the clinical data community, we’d love to have you onboard! 🚀
 
-![adamski](./adamski_logo_small.png)  
-
 ---
 
 # 🦋{admiral} Functions List
