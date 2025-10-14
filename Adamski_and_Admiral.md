@@ -38,7 +38,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_var_extreme_flag()` | Create extreme value flag |  |
 | `derive_var_joined_exist_flag()` | Create flag for joined existence |  |
 | `derive_var_merged_ef_msrc()` | Merge and derive event flag by source |  |
-| `derive_var_merged_exist_flag()` | Merge and derive existence flag | 🔧In construction |
+| `derive_var_merged_exist_flag()` | Merge and derive existence flag | ✅ Completed! |
 | `derive_var_merged_summary()` | Merge and summarize records |  |
 | `derive_var_obs_number()` | Derive observation sequence number |  |
 | `derive_var_relative_flag()` | Derive relative flag |  |
