@@ -1,10 +1,9 @@
-# adamski package
+# 🛸{adamski} and 🦋{admiral}
 
+{adamski} is under development to support ADaM creation.
+Let's build the spaceship {adamski} together! 🛰️
 
-The adamski package is currently under development to support ADaM creation.
-Let's build the spaceship [adamski] together! 🛰️
-
-Inspired by the admiral package in R, adamski aims to bring similar functionality — along with original functions and macros — to the SAS environment.
+Inspired by {admiral} package in R, adamski aims to bring similar functionality — along with original functions and macros — to the SAS environment.
 
 We are looking for collaborators and contributors to join us on this exciting journey.
 If you’re passionate about ADaM programming or want to help shape tools for the clinical data community, we’d love to have you onboard! 🚀
@@ -13,9 +12,9 @@ If you’re passionate about ADaM programming or want to help shape tools for th
 
 ---
 
-# Admiral Functions List
+# 🦋{admiral} Functions List
 
-This list summarizes all derivation-related functions available in the R `{admiral}` package (approx. 58 functions), grouped by module.  
+This list summarizes all derivation-related functions available in the R `{admiral}` package (approx. 58 functions as of October2025), grouped by module.  
 These functions serve as a reference for creating equivalent SAS macros in the **adamski** package family.
 
 ---
@@ -36,12 +35,12 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 ## 🌐 All ADaMs (General)
 
-| Function | Description | Status |
+| Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
 | `derive_var_extreme_flag()` | Create extreme value flag |  |
 | `derive_var_joined_exist_flag()` | Create flag for joined existence |  |
 | `derive_var_merged_ef_msrc()` | Merge and derive event flag by source |  |
-| `derive_var_merged_exist_flag()` | Merge and derive existence flag |  |
+| `derive_var_merged_exist_flag()` | Merge and derive existence flag | 🔧In construction |
 | `derive_var_merged_summary()` | Merge and summarize records |  |
 | `derive_var_obs_number()` | Derive observation sequence number |  |
 | `derive_var_relative_flag()` | Derive relative flag |  |
@@ -53,7 +52,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_vars_dtm_to_dt()` | Convert datetime to date |  |
 | `derive_vars_dtm_to_tm()` | Convert datetime to time |  |
 | `derive_vars_duration()` | Derive duration variables |  |
-| `derive_vars_dy()` | Derive study day variables |  |
+| `derive_vars_dy()` | Derive study day variables | ✅ Completed! |
 | `derive_vars_joined()` | Derive joined variables |  |
 | `derive_vars_merged()` | Derive merged variables |  |
 | `derive_vars_merged_lookup()` | Lookup and merge derived variables |  |
@@ -63,9 +62,9 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 ## 🧍 ADSL-specific
 
-| Function | Description | Status |
+| Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
-| `derive_var_age_years()` | Derive age in years |  |
+| `derive_var_age_years()` | Derive age in years | 🔧In construction |
 | `derive_vars_aage()` | Derive analysis age |  |
 | `derive_vars_extreme_event()` | Derive worst/best extreme event |  |
 | `derive_vars_period()` | Derive period or phase variables |  |
@@ -74,7 +73,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 ## 📊 BDS-specific
 
-| Function | Description | Status |
+| Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
 | `derive_basetype_records()` | Create baseline type records | |
 | `derive_var_analysis_ratio()` | Derive analysis ratios | |
@@ -92,7 +91,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 ## 🧾 OCCDS-specific
 
-| Function | Description | Status |
+| Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
 | `derive_var_trtemfl()` | Derive treatment-emergent flag | |
 | `derive_vars_atc()` | Derive ATC classification variables | |
@@ -103,7 +102,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 ## ➕ Adding Parameters / Records
 
-| Function | Description | Status |
+| Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
 | `default_qtc_paramcd()` | Default QTc parameter code | |
 | `derive_expected_records()` | Derive expected record structure | |
@@ -127,7 +126,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 ---
 ## ⏱️ TTE-specific (Time-to-Event)
 
-| Function | Description | Status |
+| Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
 | `derive_param_tte()` | Add Time-to-Event parameter | |
 
@@ -135,20 +134,20 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 ## adamski original
 
-| Function | Description | Status |
+| Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
 | `coming soon` | special macro(or function) | |
 
 ---
 
 ## 📝 Usage Notes
-- This list reflects `{admiral}` derivation functions as of the current version.
+- This list reflects `{admiral}` derivation functions as of October2025.
 - Additional utility functions like `call_derivation()` or `restrict_derivation()` are **not included** here.
 - Naming convention: all derivation functions follow `derive_` or `derive_vars_` prefixes for consistency.
 
 ---
 ## Acknowledgment
-The package is inspired by the R `{admiral}` package and draws on some of their ideas and functions.
+Adamski is inspired by the R `{admiral}` package and draws on some of their ideas and functions.
 
 ---
 
@@ -164,68 +163,4 @@ The package is inspired by the R `{admiral}` package and draws on some of their 
 - [Admiral Official Documentation](https://pharmaverse.github.io/admiral/reference/index.html)
 - [Admiral GitHub Repository](https://github.com/pharmaverse/admiral)
 
-
 ---
-
-## What is SAS Packages?
-
-The package is built on top of **SAS Packages Framework(SPF)** developed by Bartosz Jablonski.
-
-For more information about the framework, see [SAS Packages Framework](https://github.com/yabwon/SAS_PACKAGES).
-
-You can also find more SAS Packages (SASPacs) in the [SAS Packages Archive(SASPAC)](https://github.com/SASPAC).
-
-## How to use SAS Packages? (quick start)
-
-### 1. Set-up SAS Packages Framework
-
-First, create a directory for your packages and assign a `packages` fileref to it.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~sas
-filename packages "\path\to\your\packages";
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Secondly, enable the SAS Packages Framework.
-(If you don't have SAS Packages Framework installed, follow the instruction in 
-[SPF documentation](https://github.com/yabwon/SAS_PACKAGES/tree/main/SPF/Documentation) 
-to install SAS Packages Framework.)
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~sas
-%include packages(SPFinit.sas)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-### 2. Install SAS package
-
-Install SAS package you want to use with the SPF's `%installPackage()` macro.
-
-- For packages located in **SAS Packages Archive(SASPAC)** run:
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~sas
-  %installPackage(packageName)
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- For packages located in **PharmaForest** run:
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~sas
-  %installPackage(packageName, mirror=PharmaForest)
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- For packages located at some network location run:
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~sas
-  %installPackage(packageName, sourcePath=https://some/internet/location/for/packages)
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  (e.g. `%installPackage(ABC, sourcePath=https://github.com/SomeRepo/ABC/raw/main/)`)
-
-
-### 3. Load SAS package
-
-Load SAS package you want to use with the SPF's `%loadPackage()` macro.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~sas
-%loadPackage(packageName)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-### Enjoy!
-
----
-
