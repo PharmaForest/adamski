@@ -40,7 +40,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_var_merged_ef_msrc()` | Merge and derive event flag by source |  |
 | `derive_var_merged_exist_flag()` | Merge and derive existence flag | ✅ Completed! |
 | `derive_var_merged_summary()` | Merge and summarize records |  |
-| `derive_var_obs_number()` | Derive observation sequence number |  |
+| `derive_var_obs_number()` | Derive observation sequence number | 🔧In construction |
 | `derive_var_relative_flag()` | Derive relative flag |  |
 | `derive_var_trtdurd()` | Derive treatment duration (days) |  |
 | `derive_vars_cat()` | Derive categorical variables |  |
