@@ -50,8 +50,7 @@ run;
  - `false_value` (optional) : Value assigned to `new_var` when no match is found.
                               Default: (blank).
 ~~~
-### Sample code
-
+### Example Usage:
 ~~~sas
 data have;
   do SEX="F","M"; do AGE=12 to 17; output; end; end;
@@ -86,18 +85,13 @@ data want;
   );
 run;
 ~~~
+ Author:             Yutaka Morioka  
+ Latest update Date: 2025-10-15  
 
-
-### URL:
-
-https://github.com/PharmaForest/adamski
-
-Author:                 Yutaka Morioka
-Latest update Date:     2025-10-15
 ---
  
 ## Version history  
-0.0.2(15October2025)	: Add %derive_var_merged_exist_flag()
+0.0.2(15October2025)	: Add %derive_var_merged_exist_flag()  
 0.0.1(14October2025)	: Initial version
 
 ## What is SAS Packages?
