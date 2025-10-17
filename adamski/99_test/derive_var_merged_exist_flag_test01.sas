@@ -5,67 +5,9 @@
 
 *//*** HELP END ***/
 
-/*Compare macro*/
-%macro mp_assertdataset(
-  base=,					/* parameter in proc compare */
-  compare=,				/* parameter in proc compare */
-  desc=,					/* description */
-  id=,						/* parameter in proc compare(e.g. id=USUBJID) */
-  by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
-  criterion=0,       		/* parameter in proc compare */
-  method=absolute,    /* parameter in proc compare */
-  outds=work.test_results /* output dataset */
-);
 
-  %local _ne _equal test_result;
-
-  proc compare base=&base. compare=&compare.
-    out=_out outnoequal
-    criterion=&criterion. method=&method.
-    noprint;
-  %if %length(&by.) %then %do; by &by.; %end;
-  %if %length(&id.) %then %do; id &id.; %end;
-  run;
-
-  data _null_;
-    if 0 then set _out nobs=n;
-    call symputx('_ne', n, 'L');
-  run;
-
-  %let _equal = %sysfunc(ifc(&_ne=0, 1, 0));
-
-  %if &_equal %then %do;
-    %put NOTE: MP_ASSERTDATASET: PASS (no differences). NE=&_ne;
-    %let test_result=PASS;
-  %end;
-  %else %do;
-    %put ERROR: MP_ASSERTDATASET: FAIL (differences found). NE=&_ne;
-    %let test_result=FAIL;
-  %end;
-
-  %if %length(&outds.) %then %do;
-
-    %if not %sysfunc(exist(&outds.)) %then %do;
-      data &outds.;
-        length test_description $256 test_result $4 test_comments $256;
-        stop;
-      run;
-    %end;
-
-    data _assert_row;
-      length test_description $256 test_result $4 test_comments $256;
-      test_description = coalescec(symget('desc'),'');
-      test_result      = symget('test_result');
-      test_comments = catx(" ", "MP_ASSERTDATASET: proc compare",
-			cats("base=", symget('base')),
-			cats("compare=", symget('compare'))
-		);
-    run;
-
-    proc append base=&outds. data=_assert_row force; run;
-    proc datasets lib=work nolist; delete _assert_row; quit;
-  %end;
-%mend ;
+%loadPackage(valivali)
+%set_tmp_lib(lib=TMP, winpath=C:\Temp, otherpath=/tmp)
 
 /*Expected Dataset*/
 data e_derive_var_merged_exist_flag;
@@ -198,14 +140,10 @@ run;
 %mp_assertdataset(
   base=e_derive_var_merged_exist_flag,					/* parameter in proc compare */
   compare=o_derive_var_merged_exist_flag,				/* parameter in proc compare */
-  desc=[mp_assertdataset] Compare expected and test results, 	/* description */
+  desc=[mp_assertdataset]  (%nrstr(%derive_var_merged_exist_flag)) Compare expected and test results, 	/* description */
   id=,						/* parameter in proc compare(e.g. id=USUBJID) */
   by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
   criterion=0,       		/* parameter in proc compare */
-  method=absolute    /* parameter in proc compare */
+  method=absolute,    /* parameter in proc compare */
+  outds=TMP.adamski_test
 );
-
-/*delete temporary datasets*/
-proc datasets ;
-	delete e_derive_var_merged_exist_flag o_derive_var_merged_exist_flag t_derive_var_merged_exist_flag _out ;
-run ; quit ;
