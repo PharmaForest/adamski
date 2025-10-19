@@ -121,19 +121,44 @@ do SEX ="F","M";
 end;
 run;
 
+data CLASS;
+set SASHELP.CLASS;
+SEX=choosec(_N_,
+"M"
+,"F"
+,"F"
+,"F"
+,"M"
+,"M"
+,"F"
+,"F"
+,"M"
+,"M"
+,"F"
+,"F"
+,"F"
+,"F"
+,"M"
+,"M"
+,"M"
+,"M"
+,"M"
+);
+run;
+
 /*Output dataset*/
 data o_derive_var_merged_exist_flag;
  set t_derive_var_merged_exist_flag;
  /*key=AGE*/
- %derive_var_merged_exist_flag(dataset_add=SASHELP.CLASS,by_vars=AGE, new_var=AGE01FL);
+ %derive_var_merged_exist_flag(dataset_add=CLASS,by_vars=AGE, new_var=AGE01FL);
  /*key=AGE & SEX*/
- %derive_var_merged_exist_flag(dataset_add=SASHELP.CLASS,by_vars=AGE SEX, new_var=AGE02FL);
+ %derive_var_merged_exist_flag(dataset_add=CLASS,by_vars=AGE SEX, new_var=AGE02FL);
  /*key=AGE , type=YN*/
- %derive_var_merged_exist_flag(dataset_add=SASHELP.CLASS,by_vars=AGE, new_var=AGE03FL,false_value=N);
+ %derive_var_merged_exist_flag(dataset_add=CLASS,by_vars=AGE, new_var=AGE03FL,false_value=N);
  /*key=AGE , type=Yes/No*/
- %derive_var_merged_exist_flag(dataset_add=SASHELP.CLASS,by_vars=AGE, new_var=AGE04FL,true_value=Yes,false_value=No);
+ %derive_var_merged_exist_flag(dataset_add=CLASS,by_vars=AGE, new_var=AGE04FL,true_value=Yes,false_value=No);
  /*key=AGE , conditon:SEX=F*/
- %derive_var_merged_exist_flag(dataset_add=SASHELP.CLASS,by_vars=AGE, condition=%nrbquote(SEX="F"),new_var=AGE05FL,true_value=Y,false_value=N);
+ %derive_var_merged_exist_flag(dataset_add=CLASS,by_vars=AGE, condition=%nrbquote(SEX="F"),new_var=AGE05FL,true_value=Y,false_value=N);
 run;
 
 /*Compare*/
