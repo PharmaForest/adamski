@@ -12,7 +12,7 @@
 
  - `age_unit` (required) : Age unit. Note that permitted values are cases insensitive (e.g. "YEARS" is treated the same as "years" and "Years").
  							Permitted values "years", "months", "weeks", "days", "hours", "minutes", "seconds"
- - 'new_var'  (required) : New age variable to be created in years.
+ - `new_var`  (required) : New age variable to be created in years.
 
 ### Sample code:
 
@@ -28,12 +28,12 @@ data data1;
 run;
 
 data test1;
-set data1;  
+  set data1;  
    %derive_var_age_years(age_var=age, age_unit=age_unit, new_var=aage);
 run;
 
 data test1;
-set data1;  
+  set data1;  
   %derive_var_age_years(age_var=age, age_unit="MONTHS", new_var=aage);
 run;
 
@@ -48,7 +48,7 @@ data data2;
 run;
 
 data test2;
-set data2;  
+  set data2;  
   %derive_var_age_years(age_var=age, age_unit=age_unit, new_var=aage);
 run;
 
@@ -56,17 +56,17 @@ run;
 data data3;
   input AGE AGEU $;
   datalines;
-27 days
-24 months
-3 years
-4 weeks
-1 years
-;
+  27 days
+  24 months
+  3 years
+  4 weeks
+  1 years
+  ;
 run;
 
 data test3;
-set data3;  
-%derive_var_age_years(age_var=age, age_unit=ageu, new_var=aage);
+  set data3;  
+  %derive_var_age_years(age_var=age, age_unit=ageu, new_var=aage);
 run;
 
 
