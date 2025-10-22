@@ -14,6 +14,8 @@
  							Permitted values "years", "months", "weeks", "days", "hours", "minutes", "seconds"
  - `new_var`  (required) : New age variable to be created in years.
 
+ - 'digits' (optional) : Allows rounding of "new_var" variable based on the parameter value passed. No rounding is applied, if left blank.  
+
 ### Sample code:
 
 ~~~sas
@@ -69,7 +71,15 @@ data test3;
   %derive_var_age_years(age_var=age, age_unit=ageu, new_var=aage);
 run;
 
+data test4;
+  set data3;
+  %derive_var_age_years(age_var=age, age_unit=ageu, new_var=aage, digits=);
+run;
 
+data test5;
+  set data3;
+  %derive_var_age_years(age_var=age, age_unit=ageu, new_var=aage, digits=3);
+run;
   
 ~~~
 
@@ -85,14 +95,14 @@ https://github.com/PharmaForest/adamski
 ---
 
 Author:          	    Sharad Chhetri
-Latest udpate Date: 	2025-10-16
+Latest udpate Date: 	2025-10-21
 
 ---
 
 *//*** HELP END ***/
 
 
-%macro derive_var_age_years(age_var=, age_unit=, new_var=);
+%macro derive_var_age_years(age_var=, age_unit=, new_var=, digits=);
 
     length &new_var 8.;
     
@@ -110,8 +120,14 @@ Latest udpate Date: 	2025-10-16
       when ('')        &new_var = .; /* missing unit → missing result */
       otherwise        &new_var = .; /* invalid unit */
     end;
+
+	/* Compute rounding factor (e.g., 0.01 for 2 decimals, 0.0001 for 4) */
+	%if &digits ge 1 %then %do;
+  		%let round_val = %sysevalf(1 / (10 ** &digits.)); 
+  		&new_var=round(&new_var, &round_val); 
+	%end;
 	 
     drop age_unit_lc;  
-	
 %mend derive_var_age_years;
+
 
