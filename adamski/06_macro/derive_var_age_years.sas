@@ -14,7 +14,7 @@
  							Permitted values "years", "months", "weeks", "days", "hours", "minutes", "seconds"
  - `new_var`  (required) : New age variable to be created in years.
 
- - 'digits' (optional) : Allows rounding of "new_var" variable based on the parameter value passed. No rounding is applied, if left blank.  
+ - `digits` (optional, default=blank) : Allows rounding of "new_var" variable based on the parameter value passed. No rounding is applied, if left blank.  
 
 ### Sample code:
 
@@ -86,7 +86,7 @@ run;
 ### Note:
 
 - Parameter `dataset` in {admiral} is not defined taking into account how the macro in SAS is used.  
-
+- Parameter `digits` is an additional parameter in adamski (not exists in admiral)  
 
 ### URL:
 
@@ -117,7 +117,7 @@ Latest udpate Date: 	2025-10-21
       when ('hours')   &new_var = &age_var / (365.25*24);
       when ('minutes') &new_var = &age_var / (365.25*24*60);
       when ('seconds') &new_var = &age_var / (365.25*24*60*60);
-      when ('')        &new_var = .; /* missing unit → missing result */
+      when ('')        &new_var = .; /* missing unit ↁEmissing result */
       otherwise        &new_var = .; /* invalid unit */
     end;
 
