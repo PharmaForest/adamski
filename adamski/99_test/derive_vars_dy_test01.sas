@@ -9,7 +9,7 @@
 *//*** HELP END ***/
 
 %loadPackage(valivali)
-%set_tmp_lib(lib=TMP, winpath=C:\Temp, otherpath=/tmp)
+%set_tmp_lib(lib=TEMP, winpath=C:\Temp, otherpath=/tmp)
 
 /*Expected result dataset*/
 data _adsl_expected;
@@ -49,5 +49,5 @@ run ;
   by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
   criterion=0,       		/* parameter in proc compare */
   method=absolute,    /* parameter in proc compare */
-  outds=TMP.adamski_test
+  outds=TEMP.adamski_test
 );

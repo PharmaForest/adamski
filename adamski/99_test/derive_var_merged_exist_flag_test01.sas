@@ -7,7 +7,7 @@
 
 
 %loadPackage(valivali)
-%set_tmp_lib(lib=TMP, winpath=C:\Temp, otherpath=/tmp)
+%set_tmp_lib(lib=TEMP, winpath=C:\Temp, otherpath=/tmp)
 
 /*Expected Dataset*/
 data e_derive_var_merged_exist_flag;
@@ -122,7 +122,8 @@ end;
 run;
 
 data CLASS;
-set SASHELP.CLASS;
+length SEX $1. ;
+set SASHELP.CLASS(drop=SEX);
 SEX=choosec(_N_,
 "M"
 ,"F"
@@ -170,5 +171,5 @@ run;
   by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
   criterion=0,       		/* parameter in proc compare */
   method=absolute,    /* parameter in proc compare */
-  outds=TMP.adamski_test
+  outds=TEMP.adamski_test
 );
