@@ -62,7 +62,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 | Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
-| `derive_var_age_years()` | Derive age in years | 🔧In construction |
+| `derive_var_age_years()` | Derive age in years | ✅ Completed! |
 | `derive_vars_aage()` | Derive analysis age |  |
 | `derive_vars_extreme_event()` | Derive worst/best extreme event |  |
 | `derive_vars_period()` | Derive period or phase variables |  |
