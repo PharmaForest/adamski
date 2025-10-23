@@ -1,4 +1,4 @@
-# Adamski (Latest version 0.0.2 on 15Oct2025)
+# Adamski (Latest version 0.0.3 on 23Oct2025)
 Adamski is a SAS package inspired by the R package {admiral}. It aims to bring the same flexible and modular ADaM derivation framework to the SAS environment. The package follows the {admiral} design principles while adapting to SAS syntax and workflows. It enables consistent, reproducible ADaM dataset creation in compliance with CDISC standards.  
 Adamski serves as a bridge between open-source R implementations and traditional SAS programming.  
 
@@ -88,9 +88,45 @@ run;
  Author:             Yutaka Morioka  
  Latest update Date: 2025-10-15  
 
+## %derive_var_age_years() 
+
+### Purpose:
+   Converts a set of age values from the specified time unit to years.   
+   
+### Parameters:
+~~~sas
+ - `age_var` (required)	: The ages to convert.  
+ - `age_unit` (required) : Age unit. Note that permitted values are cases insensitive (e.g. "YEARS" is treated the same as "years" and "Years").
+ 							Permitted values "years", "months", "weeks", "days", "hours", "minutes", "seconds"
+ - `new_var`  (required) : New age variable to be created in years.
+ - `digits` (optional, default=blank) : Allows rounding of "new_var" variable based on the parameter value passed. No rounding is applied, if left blank.  
+~~~
+
+### Example usage: 
+~~~sas
+data data1;
+  input age ageu $;
+  datalines;
+  240 MONTHS
+  350 MONTHS
+  490 MONTHS
+  ;  
+run;
+data test1;
+  set data1;  
+   %derive_var_age_years(age_var=age, age_unit=ageu, new_var=aage1);
+   %derive_var_age_years(age_var=age, age_unit="MONTHS", new_var=aage2);
+   %derive_var_age_years(age_var=age, age_unit=ageu, new_var=aage3, digits=3);
+run;
+~~~
+
+ Author:             Sharad Chhetri  
+ Latest update Date: 2025-10-21  
+
 ---
  
 ## Version history  
+0.0.3(23October2025) : Added %derive_var_age_years()  
 0.0.2(15October2025)	: Add %derive_var_merged_exist_flag()  
 0.0.1(14October2025)	: Initial version
 
