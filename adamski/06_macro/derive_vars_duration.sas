@@ -90,6 +90,35 @@ set test2;
 	);
 
 run;
+
+data test3;
+  length USUBJID $3;
+  format ASTDTM LDOSEDTM datetime20.;
+
+  input USUBJID $ ASTDTM :anydtdtm. LDOSEDTM :anydtdtm.;
+  datalines;
+P01 2019-08-09T04:30:56 2019-08-08T10:05:00
+P02 2019-11-11T23:59:59 2019-10-11T11:37:00
+P03 2019-11-11T00:00:00 2019-11-10T23:59:59
+P04 2019-11-11T12:34:56 .
+P05 . 2019-09-28T12:34:56
+;
+run;
+
+data test3_op;
+set test3;
+
+	%derive_vars_duration(
+	  new_var = LDRELTM,
+	  new_var_unit = LDRELTMU,
+	  start_date = LDOSEDTM,
+	  end_date = ASTDTM,
+	  in_unit = hours,
+	  out_unit = hours,
+	  add_one = N
+	);
+run;	
+
   
 ~~~
 
@@ -139,7 +168,7 @@ Latest udpate Date: 	2025-11-17
       start_dt = &start_date;
       end_dt   = &end_date;
       
-      /* get the format */
+      /* Get the format */
       st_fmt = vformatx("&start_date");
       en_fmt = vformatx("&end_date");
       
@@ -193,3 +222,4 @@ Latest udpate Date: 	2025-11-17
     end;
 
 %mend derive_vars_duration;
+
