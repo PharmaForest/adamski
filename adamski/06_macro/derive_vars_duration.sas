@@ -61,38 +61,7 @@ set test1;
 
 run;
 
-
-
 data test2;
-  input USUBJID $ BRTHDT :yymmdd10. RANDDT :yymmdd10.;
-  format BRTHDT RANDDT yymmdd10.;
-datalines;
-P01 1984-09-06 2020-02-24
-P02 1985-01-01 .
-P03 . 2021-03-10
-P04 . .
-P05 1971-10-10 2025-10-30
-;
-run;
-
-
-data test2_op;
-set test2;
-
-	%derive_vars_duration(
-	  new_var=AAGE,
-	  new_var_unit=AAGEU,
-	  start_date=BRTHDT,
-	  end_date=RANDDT,
-	  out_unit=years,
-	  add_one=N,
-	  trunc_out=Y
-	);
-
-run;
-
-
-data test3;
   length USUBJID $3;
   format ASTDTM LDOSEDTM datetime20.;
 
@@ -106,8 +75,8 @@ P05 . 2019-09-28T12:34:56
 ;
 run;
 
-data test3_op;
-set test3;
+data test2_op;
+set test2;
 
 	%derive_vars_duration(
 	  new_var = LDRELTM,
@@ -120,7 +89,7 @@ set test3;
 	);
 run;	
 	
-data test4;
+data test3;
   length USUBJID $3;
   format ASTDTM LDOSEDTM E8601DT.;
 
@@ -136,8 +105,8 @@ P06 2025-09-28T12:34:56 2025-09-28T12:34:56
 run;
 
 
-data test4_op;
-set test4;
+data test3_op;
+set test3;
 
 	%derive_vars_duration(
 	  new_var = LDRELTM,
@@ -152,7 +121,7 @@ set test4;
 
 run;
 
-data test5;
+data test4;
   length USUBJID $3;
   format ASTDTM LDOSEDTM datetime20.;
 
@@ -168,8 +137,8 @@ P06 2000-03-01T23:59:59 2000-02-01T00:00:00
 run;
 
 
-data test5_op;
-set test5;
+data test4_op;
+set test4;
 
 	%derive_vars_duration(
 	  new_var = LDRELTM,
@@ -342,3 +311,4 @@ Latest udpate Date: 	2025-11-17
     end;
 
 %mend derive_vars_duration;
+
