@@ -1,4 +1,4 @@
-# Adamski (Latest version 0.0.3 on 23Oct2025)
+# Adamski (Latest version 0.0.4 on 21Nov2025)
 Adamski is a SAS package inspired by the R package {admiral}. It aims to bring the same flexible and modular ADaM derivation framework to the SAS environment. The package follows the {admiral} design principles while adapting to SAS syntax and workflows. It enables consistent, reproducible ADaM dataset creation in compliance with CDISC standards.  
 Adamski serves as a bridge between open-source R implementations and traditional SAS programming.  
 
@@ -123,9 +123,60 @@ run;
  Author:             Sharad Chhetri  
  Latest update Date: 2025-10-21  
 
+## %derive_vars_duration() 
+
+### Purpose:
+   Derives duration between two dates, specified by the variables present in the input dataset (e.g., duration of adverse events, relative day, age, etc.).    
+   
+### Parameters:
+~~~sas
+ - `new_var` (required) : Name of the new variable to created.
+ - `new_var_unit` (optional) : Name of the unit variable 
+ - `start_date` (required) : Start date/datetime variable
+ - `end_date` (required) : End date/datetime variable
+ - `in_unit` (required, default=days) : Name of the input unit
+ - `out_unit` (required, default=days) : Name of the output unit
+ - `floor_in` (required, default=Y) : If Y, floor datetime values to date before computing
+ - `add_one` (required, default=Y) : Add 1 to duration if Y 
+ - `trunc_out` (required, default=N) : Truncate output duration to integer value if Y
+ - `type` (required, default=duration) : Type of calculation
+~~~
+
+### Example usage: 
+~~~sas
+data test1;
+  input USUBJID $ BRTHDT :yymmdd10. RANDDT :yymmdd10.;
+  format BRTHDT RANDDT yymmdd10.;
+  datalines;
+  P01 1984-09-06 2020-02-24
+  P02 1985-01-01 .
+  P03 . 2021-03-10
+  P04 . .
+  P05 1971-10-10 2025-10-30
+  ;
+run;
+
+data test1_op;
+set test1;
+	%derive_vars_duration(
+	  new_var=AAGE,
+	  new_var_unit=AAGEU,
+	  start_date=BRTHDT,
+	  end_date=RANDDT,
+	  out_unit=years,
+	  add_one=N,
+	  trunc_out=Y
+	);
+run;
+~~~
+
+ Author:             Sharad Chhetri  
+ Latest update Date: 2025-11-17  
+
 ---
  
 ## Version history  
+0.0.4(21November2025) : Added %derive_vars_duration()  
 0.0.3(23October2025) : Added %derive_var_age_years()  
 0.0.2(15October2025)	: Add %derive_var_merged_exist_flag()  
 0.0.1(14October2025)	: Initial version
