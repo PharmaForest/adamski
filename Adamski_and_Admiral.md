@@ -49,7 +49,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_vars_dtm()` | Derive datetime variables |  |
 | `derive_vars_dtm_to_dt()` | Convert datetime to date |  |
 | `derive_vars_dtm_to_tm()` | Convert datetime to time |  |
-| `derive_vars_duration()` | Derive duration variables | 🔧In construction |
+| `derive_vars_duration()` | Derive duration variables | ✅ Completed! |
 | `derive_vars_dy()` | Derive study day variables | ✅ Completed! |
 | `derive_vars_joined()` | Derive joined variables |  |
 | `derive_vars_merged()` | Derive merged variables |  |
