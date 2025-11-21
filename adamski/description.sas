@@ -1,7 +1,7 @@
 Type : Package
 Package : Adamski
 Title : Adamski -- A SAS package of toolkit for CDISC ADaM creation
-Version : 0.0.3
+Version : 0.0.4
 Author : [Yutaka Morioka],[Hiroki Yamanobe],[Ryo Nakaya],[Sharad Shhetri]
 Maintainer : [Yutaka Morioka],[Hiroki Yamanobe],[Ryo Nakaya],[Sharad Shhetri]
 License : Apache license 2.0
@@ -27,6 +27,7 @@ In addition, new functions and macros would be developed to extend the capabilit
 - %derive_vars_dy() : Calculates DY variables
 - %derive_var_merged_exist_flag() :  Creates a character flag variable indicating whether the current DATA step row's key(s) exist in another dataset. 
 - %derive_var_age_years() : Creates age variable with unit of year  
+- %derive_vars_duration() : Derives duration between two dates, specified by the variables present in the input dataset (e.g., duration of adverse events, relative day, age, etc.)  
 
 ### Usage
 For more details, please visit https://github.com/PharmaForest/adamski]
