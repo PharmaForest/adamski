@@ -448,6 +448,9 @@ run;
 );
 
 
+
+
+
 ~~~
 
 ### Note:
@@ -501,10 +504,22 @@ Latest udpate Date: 	2025-12-21
 
 
 /* check if analysis varaible exists in dataset */
-%if %sysfunc(varnum(%sysfunc(open(&dataset)), &analysis_var)) = 0 %then %do;
-  %put ERROR: analysis_var=&analysis_var not found in &dataset.;
+%local dsid varnum rc;
+
+%let dsid = %sysfunc(open(&dataset, i)); /* open dataset in read only mode */ 
+%if &dsid = 0 %then %do;
+  %put ERROR: Cannot open dataset &dataset..;
   %abort cancel;
 %end;
+
+%let varnum = %sysfunc(varnum(&dsid, &analysis_var));
+%let rc = %sysfunc(close(&dsid));
+
+%if &varnum = 0 %then %do;
+  %put ERROR: analysis_var=&analysis_var not found in &dataset..;
+  %abort cancel;
+%end;
+
 
 /* check if output datset name is provided - default to &dataset._locf, if not provided */
 %if %superq(outdata) = %then %do;
@@ -714,6 +729,8 @@ run;
   run;
 
 %end;
+
+
 
 
 /* ---------------------------- 9. Combine data_fill + exp_obsv_to_add --------------- */
