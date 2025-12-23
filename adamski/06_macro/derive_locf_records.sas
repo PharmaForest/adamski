@@ -92,7 +92,7 @@ run;
 
 data expected_obsv2;
   length PARAMCD $5 PARAM $40 AVISIT $20;
-  infile datalines dlm='|' truncover;=
+  infile datalines dlm='|' truncover;
   input PARAMCD $ PARAM $ AVISITN AVISIT $;
 datalines;
 DIABP|Diastolic Blood Pressure (mmHg)|0|BASELINE
@@ -493,7 +493,7 @@ Latest udpate Date: 	2025-12-21
 
 /* check required parameters */
 %if %superq(dataset)= or %superq(dataset_ref)= or %superq(by_vars)= or %superq(order)= %then %do;
-  %put ERROR: Required parameters missing. dataset=, dataset_ref=, by_vars=, order=, outdata= are required.;
+  %put ERROR: Required parameters missing. dataset=, dataset_ref=, by_vars=, order= are required.;
   %abort cancel;
 %end;
 
