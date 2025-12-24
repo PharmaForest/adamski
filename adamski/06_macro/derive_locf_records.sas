@@ -731,8 +731,6 @@ run;
 %end;
 
 
-
-
 /* ---------------------------- 9. Combine data_fill + exp_obsv_to_add --------------- */
 /* Create aval_locf and flag rows where analysis_var is missing as tmp_dtype = LOCF    */
 data aval_locf;
@@ -946,6 +944,10 @@ run;
   %end;
 %end;
 
+/* sort the final dataset using the by and order variables */
+proc sort data=aval_locf; 
+  by &by_vars &order; 
+run;
 
 /* ---------------------------- 15. Cleanup temporary datasets --------------------------- */
 data &outdata;
