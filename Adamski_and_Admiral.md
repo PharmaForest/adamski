@@ -51,7 +51,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_vars_dtm_to_tm()` | Convert datetime to time |  |
 | `derive_vars_duration()` | Derive duration variables | ✅ Completed! |
 | `derive_vars_dy()` | Derive study day variables | ✅ Completed! |
-| `derive_vars_joined()` | Derive joined variables |  |
+| `derive_vars_joined()` | Derive joined variables | 🔧In construction |
 | `derive_vars_merged()` | Derive merged variables |  |
 | `derive_vars_merged_lookup()` | Lookup and merge derived variables |  |
 | `derive_vars_transposed()` | Derive transposed variables |  |
@@ -106,7 +106,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_expected_records()` | Derive expected record structure | |
 | `derive_extreme_event()` | Derive extreme events | |
 | `derive_extreme_records()` | Derive extreme records | |
-| `derive_locf_records()` | Last Observation Carried Forward (LOCF) | |
+| `derive_locf_records()` | Last Observation Carried Forward (LOCF) |🔧In construction |
 | `derive_param_bmi()` | Add BMI parameter | |
 | `derive_param_bsa()` | Add Body Surface Area parameter | |
 | `derive_param_computed()` | Add computed parameter | |
