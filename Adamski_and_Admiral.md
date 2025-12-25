@@ -106,7 +106,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_expected_records()` | Derive expected record structure | |
 | `derive_extreme_event()` | Derive extreme events | |
 | `derive_extreme_records()` | Derive extreme records | |
-| `derive_locf_records()` | Last Observation Carried Forward (LOCF) |🔧In construction |
+| `derive_locf_records()` | Last Observation Carried Forward (LOCF) |✅ Completed! |
 | `derive_param_bmi()` | Add BMI parameter | |
 | `derive_param_bsa()` | Add Body Surface Area parameter | |
 | `derive_param_computed()` | Add computed parameter | |
