@@ -9,7 +9,7 @@
 *//*** HELP END ***/
 
 %loadPackage(valivali)
-%set_tmp_lib(lib=TEMP, winpath=C:\Temp, otherpath=/tmp)
+%set_tmp_lib(lib=TEMP, winpath=C:\Temp, otherpath=/tmp, newfolder=adamski)
 
 /*Expected result dataset*/
 data _adsl_expected;

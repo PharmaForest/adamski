@@ -32,6 +32,9 @@ Adamski serves as a bridge between open-source R implementations and traditional
 
 - %derive_vars_duration : ^{newline}
   Derives duration between two dates, specified by the variables present in the input dataset, for example duration of adverse events, relative day, age, etc..  ^{newline}
+
+- %derive_locf_records : ^{newline}
+  Adds LOCF records (Last Observation Carried Forward) to a dataset based on an `expected observations` reference dataset. ^{newline}
   ),
 
   results = TEMP.adamski_test, /* validation results dataset */

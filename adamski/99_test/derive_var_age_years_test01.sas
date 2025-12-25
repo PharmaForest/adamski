@@ -8,7 +8,7 @@
 
 
 %loadPackage(valivali)
-%set_tmp_lib(lib=TEMP, winpath=C:\Temp, otherpath=/tmp)
+%set_tmp_lib(lib=TEMP, winpath=C:\Temp, otherpath=/tmp, newfolder=adamski)
 
 /*Expected Dataset*/
 data e_data;
