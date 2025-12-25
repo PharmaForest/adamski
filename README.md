@@ -1,4 +1,4 @@
-# Adamski (Latest version 0.0.4 on 21Nov2025)
+# Adamski (Latest version 0.0.5 on 25Dec2025)
 Adamski is a SAS package inspired by the R package {admiral}. It aims to bring the same flexible and modular ADaM derivation framework to the SAS environment. The package follows the {admiral} design principles while adapting to SAS syntax and workflows. It enables consistent, reproducible ADaM dataset creation in compliance with CDISC standards.  
 Adamski serves as a bridge between open-source R implementations and traditional SAS programming.  
 
@@ -173,9 +173,77 @@ run;
  Author:             Sharad Chhetri  
  Latest update Date: 2025-11-17  
 
+## %derive_locf_records() 
+
+### Purpose:
+   Add LOCF records (Last Observation Carried Forward) to a dataset based on an "expected observations" reference dataset.    
+   
+### Parameters:
+~~~sas
+ - `dataset` (required)	: Input dataset (with original observations)  
+ - `dataset_ref` (required)	: Expected-observations dataset (combinations of PARAMCD/AVISIT/etc)  
+ - `by_vars` (required)	: Space-separated list of grouping variables (e.g. STUDYID USUBJID PARAMCD)  
+ - `id_vars_ref` (optional, default=blank) : Space-separated list of id variables present in data_ref (optional). If blank, ALL vars from data_ref will be used as id_vars_ref.  
+ - `analysis_var` (required, default=aval) : Analysis variable to LOCF  
+ - `imputation` (required, default=add) : One of add | update | update_add   
+                                   `add`: Keep all original records and add imputed records for missing timepoints and missing `analysis_var` values from `dataset_ref`.  
+								`update`: Update records with missing `analysis_var` and add imputed records for missing timepoints from `dataset_ref`.  
+					        `update_add`: Keep all original records, update records with missing `analysis_var` and add imputed records for missing timepoints from `dataset_ref`.  
+ - `order` (required) : Space-separated variables to sort by within by_vars (e.g. AVISITN AVISIT)  
+ - `keep_vars` (optional) : Space-separated vars to carry forward in addition to analysis_var (optional)  
+ - `outdata` (optional, default=&dataset._locf): Output dataset with LOCF  
+~~~
+
+### Example usage: 
+~~~sas
+data input1;
+  length STUDYID $6 USUBJID $12 PARAMCD $5 PARAM $40 AVISIT $20;       
+  infile datalines dlm='|' truncover;
+  input STUDYID $ USUBJID $ PARAMCD $ PARAM $ AVAL AVISITN AVISIT $;
+datalines;
+TEST01|01-701-1015|DIABP|Diastolic Blood Pressure (mmHg)|51|0|BASELINE
+TEST01|01-701-1015|DIABP|Diastolic Blood Pressure (mmHg)|50|2|WEEK 2
+TEST01|01-701-1015|SYSBP|Systolic Blood Pressure (mmHg)|121|0|BASELINE
+TEST01|01-701-1015|SYSBP|Systolic Blood Pressure (mmHg)|121|2|WEEK 2
+TEST01|01-701-1028|DIABP|Diastolic Blood Pressure (mmHg)|79|0|BASELINE
+TEST01|01-701-1028|SYSBP|Systolic Blood Pressure (mmHg)|130|0|BASELINE
+;
+run;
+
+data expected_obsv1;
+  length PARAMCD $5 PARAM $40 AVISIT $20;
+  infile datalines dlm='|' truncover;
+  input PARAMCD $ PARAM $ AVISITN AVISIT $;
+datalines;
+DIABP|Diastolic Blood Pressure (mmHg)|0|BASELINE
+DIABP|Diastolic Blood Pressure (mmHg)|2|WEEK 2
+SYSBP|Systolic Blood Pressure (mmHg)|0|BASELINE
+SYSBP|Systolic Blood Pressure (mmHg)|2|WEEK 2
+;
+run;
+
+%derive_locf_records(
+  dataset=input1,
+  dataset_ref=expected_obsv1,
+  by_vars=STUDYID USUBJID PARAM PARAMCD,
+  id_vars_ref=PARAMCD PARAM AVISITN AVISIT,  
+  analysis_var=aval, 
+  imputation=add, 
+  order=AVISITN AVISIT,
+  keep_vars=,  
+  outdata=output_test1
+);
+
+~~~
+
+ Author:             Sharad Chhetri  
+ Latest update Date: 2025-12-21  
+
+
 ---
  
 ## Version history  
+0.0.5(25December2025) : Added %derive_locf_records()  
 0.0.4(21November2025) : Added %derive_vars_duration()  
 0.0.3(23October2025) : Added %derive_var_age_years()  
 0.0.2(15October2025)	: Add %derive_var_merged_exist_flag()  
