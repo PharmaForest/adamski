@@ -117,6 +117,12 @@ Latest udpate Date: 	2026-01-20
 
   %local _dsid _rc _msg;
 
+  /* check required parameters */
+  %if %superq(dataset)= or %superq(by_vars)= or %superq(source_var)= or %superq(new_var)= %then %do;
+    %put ERROR: Required parameters missing. dataset=, by_vars=, source_var=, new_var= are required.;
+    %abort cancel;
+  %end;
+  
   /*--------------------------------------------------------------------------*
    * Step 1: Check that input dataset exists
    *--------------------------------------------------------------------------*/
