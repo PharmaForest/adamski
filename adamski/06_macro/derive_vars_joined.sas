@@ -1,14 +1,4 @@
 /*** HELP START ***//*
-%derive_vars_joined(
-  dataset_add=,
-  by_vars=,
-  new_vars=,
-  condition=,
-  exist_flag=,
-  true_value=Y,
-  false_value=
-)
-
 ### Macro:
     %derive_vars_joined
 
@@ -29,9 +19,9 @@
       Space-separated list of variables to bring from `dataset_add` into the current DATA step.
       These variables must exist in `dataset_add`. When no match is found, they are set to missing.
 
- - `condition` (optional)
+ - `filter_add` (optional)
       WHERE clause (text) applied to `dataset_add` before building the hash.
-      If provided, only records satisfying the condition are used for lookup.
+      If provided, only records satisfying the filter_add are used for lookup.
       Example: `%nrbquote(SEX="F" and AGE>=18)`
 
  - `exist_flag` (optional)
@@ -47,7 +37,7 @@
       Default: (blank).
 
 ### How it works:
- - A hash object is created once (first iteration) from `dataset_add` (optionally filtered by `condition`).
+ - A hash object is created once (first iteration) from `dataset_add` (optionally filtered by `filter_add`).
  - `by_vars` define the key(s). `new_vars` are the data fields returned by `find()`.
  - On each DATA step row, `find()` is executed:
      - if not found: `new_vars` are set to missing
@@ -83,7 +73,7 @@ data want2;
     dataset_add = add,
     by_vars     = USUBJID,
     new_vars    = AGE SEX,
-    condition= %nrbquote(SEX="F"),
+    filter_add= %nrbquote(SEX="F"),
     exist_flag= EXFL ,
     true_value = Y,
     false_value = N
@@ -100,14 +90,14 @@ run;
     Yutaka Morioka
 
 ### Latest update Date:
-    2026-01-29
+    2026-02-01
 *//*** HELP END ***/
 
 %macro derive_vars_joined(
 dataset_add=,
 by_vars=,
 new_vars=,
-condition=,
+filter_add=,
 exist_flag= ,
 true_value = Y,
 false_value = 
@@ -123,14 +113,14 @@ if 0 then set &dataset_add(keep= &by_vars. &new_vars.);
 %let name  = &sysindex;
 retain _N_&name 1;
 if _N_&name = 1 then do;
-%if %length(&condition) ne 0 %then %do;
+%if %length(&filter_add) ne 0 %then %do;
  rc&name.=dosubl("proc sql noprint;  create view h&name.(label=%unquote(%bquote('master=&dataset_add'))) as
  select * from &dataset_add 
- where &condition;
+ where &filter_add;
  quit;");
  drop  rc&name;
 %end;
-%if %length(&condition) ne 0 %then %do;
+%if %length(&filter_add) ne 0 %then %do;
  declare hash h&name.(dataset:"h&name.(keep= &by_vars &new_vars.)" ,  duplicate:'E');
   call execute("proc sql noprint;
  drop view h&name. ;
