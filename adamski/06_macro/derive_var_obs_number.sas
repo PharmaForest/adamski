@@ -54,11 +54,12 @@ run;
 
 ### Note:
 
-- Parameter `dataset_out` in {admiral} is not defined taking into account how the macro in SAS is used.  
+- Parameter `dataset_out` specific to this SAS macro (not present in the admiral R package). 
+            It allows specifying a separate output name. If omitted, the input dataset (&data) will be overwritten.
 
-- Parameter `filter_add' is omitted because SAS's mechanism makes it difficult to differentiate it from the condition parameter. Records filtered by condition are the subject of evaluation.
+- The output dataset will be sorted by &by_vars and &order.
 
-- Parameter  `missing_value` parameter has not been implemented at this time, as there are currently few practical use cases that come to mind.
+- Temporary datasets (e.g., __temp1) are deleted at the end.
 
 ### URL:
 
