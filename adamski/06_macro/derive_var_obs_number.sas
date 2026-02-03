@@ -2,17 +2,6 @@
 
 /*** HELP START ***//*
 
-
-
-%derive_var_obs_number(
-sashelp.class
-, dataset_out=RESULT_DS
-, by_vars=SEX
-, order=AGE 
-, new_var=ASEQ
-, check_type=error
-);
-
 ### Macro:
     %derive_var_obs_number
 
