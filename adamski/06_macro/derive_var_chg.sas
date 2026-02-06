@@ -93,8 +93,9 @@ Latest udpate Date: 	2026-01-25
   /*--------------------------------------------------------------------*
    * Derive Change from Baseline
    *--------------------------------------------------------------------*/
-
+  
   /* Change from baseline = Analysis value - Baseline value */
-  &chg_var = &aval_var - &base_var;    
-
+  if not missing(&aval_var) and not missing(&base_var) then do;
+    &chg_var = &aval_var - &base_var;    
+  end;
 %mend derive_var_chg;
