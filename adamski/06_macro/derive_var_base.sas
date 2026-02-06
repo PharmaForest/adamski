@@ -12,6 +12,7 @@
  - `source_var` (required, default=AVAL) : Variable from which baseline value is taken
  - `new_var` (required, default=BASE) : Name of the new variable to created.
  - `filter` (required, default= ABLFL = "Y") : Baseline filter condition
+ - `outdata` (optional, default=&dataset._base): Output dataset with new baseline variable 
 
 ### Sample code:
 
@@ -93,6 +94,12 @@ run;
 -   If multiple baseline records are found within a BY group, the macro
     issues an error and stops.
 
+-   Parameter `outdata` is an additional (optional) parameter in adamski (not exists in admiral) for the output dataset. 
+    It returns the input dataset with the new "baseline" variable. 
+
+-   The sort order of the output dataset will be based on the "by_vars" sort order.
+
+
 ### URL:
 
 https://github.com/PharmaForest/adamski
@@ -112,7 +119,8 @@ Latest udpate Date: 	2026-01-20
     by_vars=,
     source_var=AVAL,
     new_var=BASE,
-    filter=ABLFL = "Y"
+    filter=ABLFL = "Y",
+    outdata=
 );
 
   %local _dsid _rc _msg;
@@ -122,7 +130,13 @@ Latest udpate Date: 	2026-01-20
     %put ERROR: Required parameters missing. dataset=, by_vars=, source_var=, new_var= are required.;
     %abort cancel;
   %end;
-  
+
+  /* check if output datset name is provided - default to &dataset._base, if not provided */
+  %if %superq(outdata) = %then %do;
+    %let outdata=&dataset._base;
+  %end;
+
+
   /*--------------------------------------------------------------------------*
    * Step 1: Check that input dataset exists
    *--------------------------------------------------------------------------*/
@@ -130,6 +144,7 @@ Latest udpate Date: 	2026-01-20
     %put ERROR: Input dataset &dataset does not exist.;
     %return;
   %end;
+
 
   /*--------------------------------------------------------------------------*
    * Step 2: Sort dataset by BY variables (required for BY-group processing)
@@ -185,15 +200,21 @@ Latest udpate Date: 	2026-01-20
   /*--------------------------------------------------------------------------*
    * Step 5: Merge baseline value back to all records
    *         - Baseline value is propagated within BY groups
-   *         - All original records are retained
+   *         - All original records are retained with sort order of the by variables
    *--------------------------------------------------------------------------*/
-  data &dataset;
+  data &outdata;
     merge
       _base_sorted (in=a)
       _base_records (rename=(&source_var=&new_var));
     by &by_vars;
     if a;
+    
+    label &new_var="&new_var";
   run;
+
+  proc sort data=&outdata;
+    by &by_vars;
+  quit;
 
   /*--------------------------------------------------------------------------*
    * Step 6: Cleanup temporary datasets
