@@ -130,7 +130,7 @@ https://github.com/PharmaForest/adamski
 
 ---
 Author:                 	  Ryo Nakaya
-Latest update Date:     2026-01-31
+Latest update Date:     2026-02-07
 ---
 
 *//*** HELP END ***/
@@ -170,6 +170,7 @@ options MINOPERATOR ; /* enable macro in operator */
 
     length AAGE 8 AAGEU $&_aageu_len ;
     AAGE = .;
+	AAGEU = "";
 
 	/* Decide DATE(1) vs DATETIME(0) : Date should not exceed 100,000 */
     if abs(&start_date) > 100000 or abs(&end_date) > 100000 then _is_date = 0;
@@ -177,6 +178,7 @@ options MINOPERATOR ; /* enable macro in operator */
 
     if missing(&start_date) or missing(&end_date) then do;
       AAGE = .;
+	  goto end_derive_vars_aage;
     end;
     else do;
       /* type = INTERVAL */
@@ -238,5 +240,7 @@ options MINOPERATOR ; /* enable macro in operator */
 	if AAGE ne . then AAGEU = "&_unit"; /* if AAGE is not missing then map AAGEU */
 
     drop _is_date _delta_sec;
+
+  end_derive_vars_aage:
 
 %mend derive_vars_aage;
