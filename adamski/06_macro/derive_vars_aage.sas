@@ -185,9 +185,9 @@ options MINOPERATOR ; /* enable macro in operator */
       if "&_type" = "INTERVAL" then do;
         if _is_date = 0 then do; /* Datetime */
           select ("&_unit");
-            when ("YEARS")		AAGE = intck('year' , &start_date, &end_date, 'c');
-            when ("MONTHS")	AAGE = intck('month', &start_date, &end_date, 'c');
-            when ("WEEKS")		AAGE = intck('week' , &start_date, &end_date, 'c');
+            when ("YEARS")		AAGE = intck('dtyear' , &start_date, &end_date, 'c');
+            when ("MONTHS")	AAGE = intck('dtmonth', &start_date, &end_date, 'c');
+            when ("WEEKS")		AAGE = intck('dtweek' , &start_date, &end_date, 'c');
             when ("DAYS")		AAGE = (&end_date - &start_date) / 86400; /* 24*60*60 */
             when ("HOURS")		AAGE = (&end_date - &start_date) / 3600;
             when ("MINUTES")	AAGE = (&end_date - &start_date) / 60;
