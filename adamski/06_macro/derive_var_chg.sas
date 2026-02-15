@@ -18,6 +18,7 @@
 
 data advs;
   length USUBJID $3 PARAMCD $6 ABLFL $1;
+  infile datalines truncover;
   input USUBJID $ PARAMCD $ AVAL ABLFL $ BASE;
 datalines;
 P01 WEIGHT 80.0  Y  80.0
@@ -62,7 +63,6 @@ Latest udpate Date: 	2026-01-25
     chg_var=CHG
 );
 
-
   /*--------------------------------------------------------------------*
    * Basic parameter checks
    *--------------------------------------------------------------------*/
@@ -71,25 +71,12 @@ Latest udpate Date: 	2026-01-25
     %abort cancel;
   %end;
 
-  %local dsid varnum returncd;
 
-  %let dsid = %sysfunc(open(&syslast,i));
-
-  %if &dsid > 0 %then %do;
-    %let varnum = %sysfunc(varnum(&dsid,&chg_var));
-    %let returncd = %sysfunc(close(&dsid));
-
-    %if &varnum > 0 %then %do;
-      %put WARNING: Variable &chg_var already exists in &syslast.. Values will be overwritten.;
-    %end;
-  %end;
-  %else %do;
-    /*--------------------------------------------------------------------*
-     * New change from baseline variable
-     *--------------------------------------------------------------------*/
-    length &chg_var 8.;
-  %end;	
-
+  /*--------------------------------------------------------------------*
+  * New change from baseline variable
+  *--------------------------------------------------------------------*/
+  length &chg_var 8.;
+      
   /*--------------------------------------------------------------------*
    * Derive Change from Baseline
    *--------------------------------------------------------------------*/
@@ -99,3 +86,4 @@ Latest udpate Date: 	2026-01-25
     &chg_var = &aval_var - &base_var;    
   end;
 %mend derive_var_chg;
+
