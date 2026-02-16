@@ -31,7 +31,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 ---
 
-## 🌐 All ADaMs (General)
+## 🌐 All ADaMs (General) Status(🔧In construction/✅ Completed!)
 
 | Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
@@ -40,7 +40,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_var_merged_ef_msrc()` | Merge and derive event flag by source |  |
 | `derive_var_merged_exist_flag()` | Merge and derive existence flag | ✅ Completed! |
 | `derive_var_merged_summary()` | Merge and summarize records |  |
-| `derive_var_obs_number()` | Derive observation sequence number | 🔧In construction |
+| `derive_var_obs_number()` | Derive observation sequence number | ✅ Completed! |
 | `derive_var_relative_flag()` | Derive relative flag |  |
 | `derive_var_trtdurd()` | Derive treatment duration (days) |  |
 | `derive_vars_cat()` | Derive categorical variables |  |
@@ -51,7 +51,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_vars_dtm_to_tm()` | Convert datetime to time |  |
 | `derive_vars_duration()` | Derive duration variables | ✅ Completed! |
 | `derive_vars_dy()` | Derive study day variables | ✅ Completed! |
-| `derive_vars_joined()` | Derive joined variables | 🔧In construction |
+| `derive_vars_joined()` | Derive joined variables | ✅ Completed! |
 | `derive_vars_merged()` | Derive merged variables |  |
 | `derive_vars_merged_lookup()` | Lookup and merge derived variables |  |
 | `derive_vars_transposed()` | Derive transposed variables |  |
@@ -63,7 +63,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
 | `derive_var_age_years()` | Derive age in years | ✅ Completed! |
-| `derive_vars_aage()` | Derive analysis age | 🔧In construction |
+| `derive_vars_aage()` | Derive analysis age | ✅ Completed! |
 | `derive_vars_extreme_event()` | Derive worst/best extreme event |  |
 | `derive_vars_period()` | Derive period or phase variables |  |
 
@@ -78,8 +78,8 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_var_anrind()` | Derive reference range indicator | |
 | `derive_var_atoxgr()` | Derive adverse event toxicity grade | |
 | `derive_var_atoxgr_dir()` | Derive directional adverse event toxicity grade | |
-| `derive_var_base()` | Derive baseline values | |
-| `derive_var_chg()` | Derive change from baseline | |
+| `derive_var_base()` | Derive baseline values |✅ Completed! |
+| `derive_var_chg()` | Derive change from baseline |✅ Completed! |
 | `derive_var_ontrtfl()` | Derive on-treatment flag | |
 | `derive_var_pchg()` | Derive percent change | |
 | `derive_var_shift()` | Derive shift table variables | |
