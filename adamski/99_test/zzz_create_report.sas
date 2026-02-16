@@ -35,6 +35,21 @@ Adamski serves as a bridge between open-source R implementations and traditional
 
 - %derive_locf_records : ^{newline}
   Adds LOCF records (Last Observation Carried Forward) to a dataset based on an `expected observations` reference dataset. ^{newline}
+
+- %derive_var_base() : ^{newline}
+  Derive baseline variables (e.g. BASE, BASEC, BNRIND) in a BDS dataset. ^{newline}
+ 
+- %derive_var_chg() : ^{newline}
+  Derive Change from Baseline (CHG) in a BDS-style dataset. ^{newline} 
+
+- %derive_var_obs_number() : ^{newline}
+  Adds a sequence number variable to a dataset based on grouping keys and sort order. Useful for creating sequence numbers like `ASEQ`, `AESEQ`, or `CMSEQ`. ^{newline}
+
+- %derive_vars_aage() : ^{newline}
+  Derives analysis age variables `AAGE` (numeric) and `AAGEU` (unit) from a start and end date/datetime. ^{newline}
+ 
+- %derive_vars_joined() : ^{newline}
+  Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset.  ^{newline}
   ),
 
   results = TEMP.adamski_test, /* validation results dataset */

@@ -44,7 +44,7 @@ run ;
 %mp_assertdataset(
   base=_adsl_expected,					/* parameter in proc compare */
   compare=_adsl_test,				/* parameter in proc compare */
-  desc=[mp_assertdataset] (%nrstr(%derive_vars_dy)) Compare expected and test results, 	/* description */
+  desc=(%nrstr(%derive_vars_dy)) Compare expected and test results, 	/* description */
   id=,						/* parameter in proc compare(e.g. id=USUBJID) */
   by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
   criterion=0,       		/* parameter in proc compare */

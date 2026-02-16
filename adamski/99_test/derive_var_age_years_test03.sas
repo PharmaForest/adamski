@@ -40,7 +40,7 @@ run;
 %mp_assertdataset(
   base=e_data,					/* parameter in proc compare */
   compare=o_data,				/* parameter in proc compare */
-  desc=[mp_assertdataset]  (%nrstr(%derive_var_age_years)) Compare expected and test results for case of digits=2, 	/* description */
+  desc=(%nrstr(%derive_var_age_years)) Compare expected and test results for case of digits=2, 	/* description */
   id=,						/* parameter in proc compare(e.g. id=USUBJID) */
   by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
   criterion=0,       		/* parameter in proc compare */
