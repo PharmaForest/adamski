@@ -1,4 +1,4 @@
-# Adamski (Latest version 0.0.5 on 25Dec2025)
+# Adamski (Latest version 0.0.6 on 26Feb2026)
 Adamski is a SAS package inspired by the R package {admiral}. It aims to bring the same flexible and modular ADaM derivation framework to the SAS environment. The package follows the {admiral} design principles while adapting to SAS syntax and workflows. It enables consistent, reproducible ADaM dataset creation in compliance with CDISC standards.  
 Adamski serves as a bridge between open-source R implementations and traditional SAS programming.  
 
@@ -233,16 +233,300 @@ run;
   keep_vars=,  
   outdata=output_test1
 );
-
-~~~
+~~~  
 
  Author:             Sharad Chhetri  
  Latest update Date: 2025-12-21  
 
+## %derive_var_base()
+
+### Purpose:
+  Derive baseline variables (e.g. BASE, BASEC, BNRIND) in a BDS dataset.  
+
+### Parameters:  
+~~~sas
+ - `dataset` (required) : Name of the input daset
+ - `by_vars` (required) : Space-separated list of BY variables (e.g. USUBJID PARAMCD)
+ - `source_var` (required, default=AVAL) : Variable from which baseline value is taken
+ - `new_var` (required, default=BASE) : Name of the new variable to created.
+ - `filter` (required, default= ABLFL = "Y") : Baseline filter condition
+ - `outdata` (optional, default=&dataset._base): Output dataset with new baseline variable 
+~~~
+
+### Example usage:  
+~~~sas
+data adlb1 adlb2 adlb3;
+  length
+    STUDYID  $6
+    USUBJID  $6
+    PARAMCD  $7
+    AVISIT   $9
+    ABLFL    $1
+    ANRIND   $6
+    AVALC    $6
+  ;
+
+  input
+    STUDYID $
+    USUBJID $
+    PARAMCD $
+    AVAL
+    AVALC $
+    AVISIT $
+    ABLFL $
+    ANRIND $
+  ;
+
+datalines;
+TEST01 PAT01 PARAM01 10.12 .     Baseline Y NORMAL
+TEST01 PAT01 PARAM01  9.70 .     Day7     . LOW
+TEST01 PAT01 PARAM01 15.01 .     Day14    . HIGH
+TEST01 PAT01 PARAM02  8.35 .     Baseline Y LOW
+TEST01 PAT01 PARAM02  .    .     Day7     . .
+TEST01 PAT01 PARAM02  8.35 .     Day14    . LOW
+TEST01 PAT01 PARAM03  .    LOW   Baseline Y .
+TEST01 PAT01 PARAM03  .    LOW   Day7     . .
+TEST01 PAT01 PARAM03  .    MEDIUM Day14   . .
+TEST01 PAT01 PARAM04  .    HIGH  Baseline Y .
+TEST01 PAT01 PARAM04  .    HIGH  Day7     . .
+TEST01 PAT01 PARAM04  .    MEDIUM Day14   . .
+;
+run;
+
+**Derive BASE from AVAL;
+%derive_var_base(
+  dataset=adlb1,
+  by_vars=USUBJID PARAMCD,
+  source_var=AVAL,
+  new_var=BASE
+);
+
+** Derive BASEC from AVALC;
+%derive_var_base(
+  dataset=adlb2,
+  by_vars=USUBJID PARAMCD,
+  source_var=AVALC,
+  new_var=BASEC
+);
+
+** Derive BNRIND from ANRIND;
+%derive_var_base(
+  dataset=adlb3,
+  by_vars=USUBJID PARAMCD,
+  source_var=ANRIND,
+  new_var=BNRIND
+);
+~~~
+
+Author:          	    Sharad Chhetri  
+Latest udpate Date: 	2026-01-20
+
+## %derive_var_chg()
+
+### Purpose:
+  Derive Change from Baseline (CHG) in a BDS-style dataset.  
+
+### Parameters:  
+~~~sas 
+ - `aval_var` (required, default=AVAL) : Analysis variable from which baseline value is taken out 
+ - `base_var` (required, default=BASE) : Baseline variable
+ - `chg_var` (required, default=CHG) : Change from baseline variable. (&aval_var - &base_var)
+~~~
+
+### Example usage:
+~~~sas
+data advs;
+  length USUBJID $3 PARAMCD $6 ABLFL $1;
+  infile datalines truncover;
+  input USUBJID $ PARAMCD $ AVAL ABLFL $ BASE;
+datalines;
+P01 WEIGHT 80.0  Y  80.0
+P01 WEIGHT 80.8  .  80.0
+P01 WEIGHT 81.4  .  80.0
+P02 WEIGHT 75.3  Y  75.3
+P02 WEIGHT 76.0  .  75.3
+;
+run;
+
+data advs;
+  set advs;
+  %derive_var_chg();
+run;  
+~~~
+
+Author:          	    Sharad Chhetri  
+Latest udpate Date: 	2026-01-25
+
+## %derive_var_obs_number()
+
+### Purpose:
+  Adds a sequence number variable to a dataset based on grouping keys and sort order. Useful for creating sequence numbers like `ASEQ`, `AESEQ`, or `CMSEQ`.
+
+### Parameters:
+~~~sas
+ - `data`        (required) : Input dataset name.
+ - `dataset_out` (optional) : Output dataset name. Default: Same as data.
+ - `by_vars`     (required) : Space-separated list of grouping variables. The sequence number resets for each new group defined here.
+ - `order`       (optional) : Space-separated list of variables to sort by within the group. Determines the order of the sequence.
+ - `new_var`     (optional) : Name of the output sequence variable. 
+                              Default: ASEQ.
+ - `check_type`  (optional) : Specifies the log message type if duplicates are found based on by_vars and order. 
+                              Values: none, warning, error. If warning or error, a message is written to the log if the combination of by_vars and order is not unique (which implies non-deterministic sequencing). 
+                              Default: none.
+~~~
+
+### Example usage:
+
+~~~sas
+* Create sample data;
+data adae;
+  input USUBJID $ AESTDTC $ AETERM $;
+  datalines;
+001 2024-01-01 Headache
+001 2024-01-05 Fever
+001 2024-01-01 Nausea
+002 2024-02-01 Rash
+;
+run;
+
+* Derive ASEQ;
+%derive_var_obs_number(
+  data        = adae,
+  dataset_out = adae_seq,
+  by_vars     = USUBJID,
+  order       = AESTDTC,
+  new_var     = ASEQ,
+  check_type  = warning
+);
+~~~
+
+Author:                 Hiroki Yamanobe  
+Latest update Date:     2026-02-03
+
+## %derive_vars_aage()
+
+### Purpose:
+  Derives analysis age variables `AAGE` (numeric) and `AAGEU` (unit) from a start and end date/datetime.
+  Supports two calculation modes:
+    - `INTERVAL`: uses calendar interval counting for YEARS/MONTHS/WEEKS.
+    - `DURATION`: uses exact elapsed time converted to the requested unit (with average year/month lengths).
+
+### Parameters:
+~~~sas
+ - `start_date` (required) :
+    Start date/datetime variable (default: `BRTHDT`).
+ - `end_date` (required) :
+    End date/datetime variable (default: `RANDDT`).
+ - `age_unit` (required) :
+    Unit for age calculation. Supported (case-insensitive synonyms):
+    YEARS (YEAR/YEARS/Y/YR/YRS),
+    MONTHS (MONTH/MONTHS/MO/MOS),
+    WEEKS (WEEK/WEEKS/WK/WKS/W),
+    DAYS (DAY/DAYS/D),
+    HOURS (HOUR/HOURS/H/HR/HRS),
+    MINUTES (MINUTE/MINUTES/MIN/MINS),
+    SECONDS (SECOND/SECONDS/SEC/SECS/S).
+ - `type` (required) :
+    Calculation type: `INTERVAL` or `DURATION` (default: `INTERVAL`).
+ - `digits` (optional) :
+    If provided and >= 1, rounds `AAGE` to the given number of decimal places.
+~~~
+### Example usage:
+~~~sas
+data test_aage;
+  length USUBJID $10;
+  format BRTHDT RANDDT yymmdd10.
+         BRTHDTM RANDDTM datetime19.;
+  
+  USUBJID = "SUBJ01";
+  BRTHDT  = '06SEP1984'd;
+  RANDDT  = '24FEB2020'd;
+  BRTHDTM = dhms(BRTHDT, 0, 0, 0);
+  RANDDTM = dhms(RANDDT, 0, 0, 0);
+  output;
+run;
+
+data adsl;
+  set test_aage;
+  %derive_vars_aage(
+    start_date = BRTHDTM,
+    end_date   = RANDDTM,
+    age_unit   = weeks,
+    type       = duration,
+    digits     = 2
+  )
+run;
+~~~
+
+Author:                 Ryo Nakaya  
+Latest update Date:     2026-02-07
+
+## %derive_vars_joined()
+
+### Purpose:
+  Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset.  
+  If key(s) match, values of `new_vars` are populated from `dataset_add`.  
+  Optionally creates a character flag `exist_flag` indicating whether a match exists.
+
+### Parameters:
+~~~sas
+ - `dataset_add` (required)
+      Source dataset used for the lookup (e.g., `SDTM.AE`).
+ - `by_vars` (required)
+      Space-separated list of key variables used to find matches (e.g., `USUBJID`).
+ - `new_vars` (required)
+      Space-separated list of variables to bring from `dataset_add` into the current DATA step.
+      These variables must exist in `dataset_add`. When no match is found, they are set to missing.
+ - `filter_add` (optional)
+      WHERE clause (text) applied to `dataset_add` before building the hash.
+      If provided, only records satisfying the filter_add are used for lookup.
+      Example: `%nrbquote(SEX="F" and AGE>=18)`
+ - `exist_flag` (optional)
+      Name of an output character variable indicating existence of a match for the current row’s key(s).
+      If omitted, no flag is created.
+ - `true_value` (optional)
+      Value assigned to `exist_flag` when a match is found.
+      Default: `Y`.
+ - `false_value` (optional)
+      Value assigned to `exist_flag` when no match is found.
+      Default: (blank).
+~~~
+
+### Example usage:
+~~~sas
+data have;
+  do USUBJID="010","020","030";
+        output;
+  end;
+run;
+data add;
+  do USUBJID="010","020","040";
+        AGE=input(USUBJID,best.);
+        SEX=choosec(whichc(USUBJID,"010","020","040"),"M","F","F");
+        output;
+  end;
+run;
+data want;
+  set have;
+  %derive_vars_joined(
+    dataset_add = add,
+    by_vars     = USUBJID,
+    new_vars    = AGE SEX,
+    filter_add= %nrbquote(SEX="F"),
+    exist_flag= EXFL ,
+    true_value = Y,
+    false_value = N
+  );
+run;
+~~~
+
+Author:   Yutaka Morioka  
+Latest update Date: 2026-02-01
 
 ---
  
 ## Version history  
+0.0.6(16February2026) : Added %derive_var_base(), %derive_var_chg(), %derive_var_obs_number(), %derive_vars_aage(), %derive_vars_joined()  
 0.0.5(25December2025) : Added %derive_locf_records()  
 0.0.4(21November2025) : Added %derive_vars_duration()  
 0.0.3(23October2025) : Added %derive_var_age_years()  
