@@ -117,6 +117,40 @@ run;
 );
 
 
+****Test5;
+data adlb;
+  length USUBJID $12 PARAM $10 AVAL 8 AVALU $10 ANRHI 8;
+  infile datalines dlm=',' dsd truncover;
+  input USUBJID $ PARAM $ AVAL AVALU $ ANRHI;
+datalines;
+01-701-1015,ALT,150,U/L,40,
+01-701-1023,ALT,70,U/L,40,
+01-701-1036,ALT,130,U/L,40,
+01-701-1048,ALT,30,U/L,40,
+01-701-1015,AST,50,U/L,35
+;
+run;
+
+
+data definition;
+    length PARAM $10 CONDITION $50 MCRIT1ML $15 MCRIT1MN 8;
+    infile datalines dlm=',' dsd truncover;
+    input PARAM $ CONDITION $ MCRIT1ML $ MCRIT1MN;
+datalines;
+ALT,AVAL <= ANRHI,<=ANRHI,1
+ALT,ANRHI < AVAL & AVAL <= 3 * ANRHI, >1-3*ANRHI,2
+ALT,3 * ANRHI < AVAL, >3*ANRHI,3
+;
+run;
+
+%derive_vars_cat(
+  dataset=adlb,
+  definition=definition,
+  by_vars = PARAM,
+  outdata=adlb_test
+);
+
+
 ~~~
 
 ### Note:
@@ -255,12 +289,6 @@ Latest udpate Date: 	2026-02-28
     %end;
   
     set &dataset;
-
-    /* Initialize derived variables */
-    %do i=1 %to &_nvars;
-      %let var = %scan(&_new_vars,&i);
-      call missing(&var);
-    %end;
 
     /* Generate rule logic */
     %do r=1 %to &_nrules;
