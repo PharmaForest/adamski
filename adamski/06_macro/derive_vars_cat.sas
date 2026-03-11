@@ -190,7 +190,9 @@ Latest udpate Date: 	2026-02-28
     by_vars=,
     outdata=
 );
-
+  
+  /* set local macro variables */
+  %local lib_in mem_in lib_con mem_con drop_common i nby this_by dsid varnum rc;
 
   /* check required parameters */
   %if %superq(dataset)= or %superq(definition)= %then %do;
@@ -199,12 +201,116 @@ Latest udpate Date: 	2026-02-28
   %end;
 
 
-  /* check if output datset name is provided - default to &dataset._locf, if not provided */
+  /* check if output datset name is provided - default to &dataset._cat, if not provided */
   %if %superq(outdata) = %then %do;
     %let outdata=&dataset._cat;
   %end;
+
+        
+  /*--------------------------------------------------------------*
+   * Parse input dataset name into library and member name        *
+   * Assume WORK library if it is not provided                    *
+   *--------------------------------------------------------------*/
+  %if %index(&dataset,.) %then %do;
+      %let lib_in=%upcase(%scan(&dataset,1,.));
+      %let mem_in=%upcase(%scan(&dataset,2,.));
+  %end;
+  %else %do;
+      %let lib_in=WORK;
+      %let mem_in=%upcase(&dataset);
+  %end;
+
+  /*--------------------------------------------------------------*
+   * Parse condition dataset name into library and member name    *
+   * Assume WORK library if it is not provided                    *
+   *--------------------------------------------------------------*/
+  %if %index(&definition,.) %then %do;
+      %let lib_con=%upcase(%scan(&definition,1,.));
+      %let mem_con=%upcase(%scan(&definition,2,.));
+  %end;
+  %else %do;
+      %let lib_con=WORK;
+      %let mem_con=%upcase(&definition);
+  %end;
+
+  /*--------------------------------------------------------------*
+   * If by_vars is provided, check that each BY variable exists  *
+   * in input dataset                                            *
+   *--------------------------------------------------------------*/
+  %if %superq(by_vars) ne %then %do;
+
+      /*----------------------------------------------------------*
+       * Count the number of BY variables supplied                *
+       *----------------------------------------------------------*/
+      %let nby=%sysfunc(countw(%superq(by_vars),%str( )));
+
+      /*----------------------------------------------------------*
+       * Loop through each BY variable and validate existence     *
+       * in input dataset and condition dataset                   *
+       *----------------------------------------------------------*/
+      %do i=1 %to &nby;
+          %let this_by=%scan(%superq(by_vars),&i,%str( ));
+
+          /*------------------------------------------------------*
+           * Open input dataset and check whether current by_vars  *
+           * exists                                               *
+           *------------------------------------------------------*/
+          %let dsid=%sysfunc(open(&dataset,i));
+          %if &dsid %then %do;
+              %let varnum=%sysfunc(varnum(&dsid,&this_by));
+              %let rc=%sysfunc(close(&dsid));
+              
+              %if &varnum=0 %then %do;
+                  %put ERROR: BY variable &this_by does not exist in dataset &dataset..;
+                  %return;
+              %end;
+          %end;
+          %else %do;
+              %put ERROR: Unable to open dataset &dataset..;
+              %return;
+          %end;
+      %end;
+  %end;
+
+  /*------------------------------------------------------------
+    If by_vars not provided:
+    find common variables and drop them from condition dataset
+    this step is needed to ensure the values in input dataset are not overwritten
+  --------------------------------------------------------------*/
   
+  /* create a new condition dataset name */
+  %let _definition=&definition._clean;
+ 
+  %if %superq(by_vars)= %then %do;
+	
+      proc sql noprint;
+          select c.name
+            into :drop_common separated by ' '
+          from dictionary.columns as i
+          inner join dictionary.columns as c
+              on i.name = c.name
+          where i.libname = "&lib_in"
+            and i.memname = "&mem_in"
+            and c.libname = "&lib_con"
+            and c.memname = "&mem_con";
+      quit;
+
+      %if %superq(drop_common) ne %then %do;
+          data &_definition;
+            set &definition(drop=&drop_common);
+          run;
+      %end;
+      %else %do;
+          data &_definition;
+              set &definition;
+          run;
+      %end;
+
+      /* set the new dataset name */
+      %let definition=&_definition;
+  %end;
   
+  /* process based on the by vars */
   %local _has_by _byvar _nvars _nrules;
 
   %let _has_by = %sysevalf(%superq(by_vars) ne , boolean);
@@ -326,12 +432,12 @@ Latest udpate Date: 	2026-02-28
 
   run;
  
-    /*--------------------------------------------*
-     * Cleanup
-     *--------------------------------------------*/
-    proc datasets lib=work nolist;
-        delete _def_meta _def_vars;
-    quit;
+  /*--------------------------------------------*
+   * Cleanup
+   *--------------------------------------------*/
+  proc datasets lib=work nolist;
+      delete _def_meta _def_vars &_definition;
+  quit;
 
 
 %mend derive_vars_cat;
