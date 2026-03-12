@@ -380,9 +380,9 @@ Latest udpate Date: 	2026-02-28
   run;
   
 
-  /*----------------------------------------------*
-   * Generate DATA step with case_when logic
-   *----------------------------------------------*/
+  /*------------------------------------------------------------------------*
+   * Generate DATA steps - Apply condition and process for each new variable
+   *------------------------------------------------------------------------*/
   data &outdata;
   
     /* ---- Set LENGTH for character variables ---- */
