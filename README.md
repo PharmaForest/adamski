@@ -1,4 +1,4 @@
-# Adamski (Latest version 0.0.6 on 26Feb2026)
+# Adamski (Latest version 0.0.7 on 14Mar2026)
 Adamski is a SAS package inspired by the R package {admiral}. It aims to bring the same flexible and modular ADaM derivation framework to the SAS environment. The package follows the {admiral} design principles while adapting to SAS syntax and workflows. It enables consistent, reproducible ADaM dataset creation in compliance with CDISC standards.  
 Adamski serves as a bridge between open-source R implementations and traditional SAS programming.  
 
@@ -523,9 +523,64 @@ run;
 Author:   Yutaka Morioka  
 Latest update Date: 2026-02-01
 
+## %derive_vars_cat()
+
+### Purpose:
+  Derive Categorization Variables Like `AVALCATy` and `AVALCAyN`  
+
+### Parameters:
+~~~sas
+ - `dataset` (required)	: Input dataset (with original observations)
+
+ - `definition` (required) : Rule dataset containing CONDITION and target vars.
+ 							 (It is a rule table that defines the logical condition and the corresponding category values to assign)
+
+ - `by_vars` (optional)	: Space-separated list of grouping variables (e.g. STUDYID USUBJID PARAMCD)
+
+ - `outdata` (optional, default=&dataset._cat): Output dataset with category variables
+~~~
+
+### Example usage:
+~~~sas
+data advs;
+  length USUBJID $12 VSTEST $10;
+  infile datalines truncover;
+  input USUBJID $ VSTEST $ AVAL;
+datalines;
+01-701-1015 Height 147.32
+01-701-1015 Weight 53.98
+01-701-1023 Height 162.56
+01-701-1023 Weight .
+01-701-1028 Height .
+01-701-1028 Weight .
+01-701-1033 Height 175.26
+01-701-1033 Weight 88.45
+;
+run;
+
+data definition;
+  length CONDITION $200 AVALCAT1 $20 ;
+  infile datalines dlm='|' truncover;
+  input CONDITION $ AVALCAT1 $ AVALCA1N;
+datalines;
+AVAL >= 140|>=140 cm|1
+AVAL >0 and AVAL < 140|<140 cm|2
+;
+run;
+
+%derive_vars_cat(
+  dataset=advs,
+  definition=definition
+);
+~~~
+
+Author:   Sharad Chhetri  
+Latest update Date: 2026-02-28
+
 ---
  
 ## Version history  
+0.0.7(14March2026) : Added %derive_vars_cat()  
 0.0.6(16February2026) : Added %derive_var_base(), %derive_var_chg(), %derive_var_obs_number(), %derive_vars_aage(), %derive_vars_joined()  
 0.0.5(25December2025) : Added %derive_locf_records()  
 0.0.4(21November2025) : Added %derive_vars_duration()  
