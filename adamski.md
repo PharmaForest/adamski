@@ -9,17 +9,17 @@
 ### Version information:
   
 - Package: Adamski
-- Version: 0.0.6
-- Generated: 2026-02-16T15:19:11
+- Version: 0.0.7
+- Generated: 2026-03-14T16:16:07
 - Author(s): [Yutaka Morioka],[Hiroki Yamanobe],[Ryo Nakaya],[Sharad Chhetri]
 - Maintainer(s): [Yutaka Morioka],[Hiroki Yamanobe],[Ryo Nakaya],[Sharad Chhetri]
 - License: Apache license 2.0
-- File SHA256: `F*F64D0D4150ECA51270822FCBF2357EBA79A8115CF53AA6E1D1C45E88E42352D1` for this version
-- Content SHA256: `C*4A23E2334D323AD0A5F88C4C54B0E37C5BFB35D95E8239FDFD1427DE315412FB` for this version
+- File SHA256: `F*64AE34AA3967D40C874C1938984303F76A195CF23085CFE9074DF71934228B57` for this version
+- Content SHA256: `C*6AE3D65000E8346523EDBED51F25D7A74095C734C7E921E56DFDA8A2460D4789` for this version
   
 ---
  
-# The `Adamski` package, version: `0.0.6`;
+# The `Adamski` package, version: `0.0.7`;
   
 ---
  
@@ -47,6 +47,8 @@ In addition, new functions and macros would be developed to extend the capabilit
 - %derive_var_obs_number() : Adds a sequence number variable to a dataset based on grouping keys and sort order. Useful for creating sequence numbers like `ASEQ`, `AESEQ`, or `CMSEQ`. 
 - %derive_vars_aage() : Derives analysis age variables `AAGE` (numeric) and `AAGEU` (unit) from a start and end date/datetime.  
 - %derive_vars_joined() : Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset.  
+- %derive_vars_cat() : Derive Categorization Variables Like `AVALCATy` and `AVALCAyN` 
+
 
 ### Usage
 For more details, please visit https://github.com/PharmaForest/adamski  
@@ -89,12 +91,13 @@ The `Adamski` package consists of the following content:
 5. [`%derive_var_merged_exist_flag()` macro ](#derivevarmergedexistflag-macro-5 )
 6. [`%derive_var_obs_number()` macro ](#derivevarobsnumber-macro-6 )
 7. [`%derive_vars_aage()` macro ](#derivevarsaage-macro-7 )
-8. [`%derive_vars_duration()` macro ](#derivevarsduration-macro-8 )
-9. [`%derive_vars_dy()` macro ](#derivevarsdy-macro-9 )
-10. [`%derive_vars_joined()` macro ](#derivevarsjoined-macro-10 )
+8. [`%derive_vars_cat()` macro ](#derivevarscat-macro-8 )
+9. [`%derive_vars_duration()` macro ](#derivevarsduration-macro-9 )
+10. [`%derive_vars_dy()` macro ](#derivevarsdy-macro-10 )
+11. [`%derive_vars_joined()` macro ](#derivevarsjoined-macro-11 )
   
  
-11. [License note](#license)
+12. [License note](#license)
   
 ---
  
@@ -1140,7 +1143,192 @@ Latest update Date:     2026-02-07
   
 ---
  
-## `%derive_vars_duration()` macro <a name="derivevarsduration-macro-8"></a> ######
+## `%derive_vars_cat()` macro <a name="derivevarscat-macro-8"></a> ######
+
+### Macro:
+    %derive_vars_cat
+
+### Purpose:
+    Derive Categorization Variables Like `AVALCATy` and `AVALCAyN`
+
+### Parameters:  
+
+ - `dataset` (required)	: Input dataset (with original observations)
+
+ - `definition` (required) : Rule dataset containing CONDITION and target vars.
+ 							 (It is a rule table that defines the logical condition and the corresponding category values to assign)
+
+ - `by_vars` (optional)	: Space-separated list of grouping variables (e.g. STUDYID USUBJID PARAMCD)
+
+ - `outdata` (optional, default=&dataset._cat): Output dataset with category variables
+
+
+### Sample code:
+
+~~~sas
+
+****Input Data;
+data advs;
+  length USUBJID $12 VSTEST $10;
+  infile datalines truncover;
+  input USUBJID $ VSTEST $ AVAL;
+datalines;
+01-701-1015 Height 147.32
+01-701-1015 Weight 53.98
+01-701-1023 Height 162.56
+01-701-1023 Weight .
+01-701-1028 Height .
+01-701-1028 Weight .
+01-701-1033 Height 175.26
+01-701-1033 Weight 88.45
+;
+run;
+
+
+****Test1;
+data definition;
+  length CONDITION $200 AVALCAT1 $20 ;
+  infile datalines dlm='|' truncover;
+  input CONDITION $ AVALCAT1 $ AVALCA1N;
+datalines;
+AVAL >= 140|>=140 cm|1
+AVAL >0 and AVAL < 140|<140 cm|2
+;
+run;
+
+%derive_vars_cat(
+  dataset=advs,
+  definition=definition
+);
+
+
+****Test2;
+data definition;
+  length CONDITION $200 AVALCAT1 $20 NEWCOL $20;
+  infile datalines dlm='|' truncover;
+  input CONDITION $ AVALCAT1 $ AVALCA1N NEWCOL $;
+datalines;
+VSTEST="Height" and AVAL>160|>160_cm|1|extra1
+VSTEST="Height" and aval ne . and AVAL<=160|<=160_cm|2|extra2
+;
+run;
+
+%derive_vars_cat(
+  dataset=advs,
+  definition=definition,
+  outdata=advs_test
+);
+
+
+****Test3;
+data definition;
+    length VSTEST $10 CONDITION $50 AVALCAT1 $10 AVALCA1N 8 AVALCAT2 $6 AVALCA2N 8 AVALCAT3 $7;
+    infile datalines dlm='|' dsd truncover;
+    input VSTEST $ CONDITION $ AVALCAT1 $ AVALCA1N AVALCAT2 $ AVALCA2N AVALCAT3 $;
+datalines;
+Height|AVAL>160|>160 cm|1|Tall|1|Group A
+Height|AVAL ne . and AVAL<=160|<=160 cm|2|Short|2|Group B
+Weight|AVAL>70|>70 kg|3|Heavy|3|Group C
+Weight|AVAL ne . and AVAL<=70|<=70 kg|4|Light|4|Group D
+;
+run;
+
+%derive_vars_cat(
+  dataset=advs,
+  definition=definition,
+  outdata=advs_test
+);
+
+
+****Test4;
+data definition;
+    length VSTEST $10 CONDITION $50 AVALCAT1 $10 AVALCA1N 8 AVALCAT2 $6 AVALCA2N 8 AVALCAT3 $7;
+    infile datalines dlm='|' dsd truncover;
+    input VSTEST $ CONDITION $ AVALCAT1 $ AVALCA1N AVALCAT2 $ AVALCA2N AVALCAT3 $;
+datalines;
+Height|AVAL>160|>160 cm|1|Tall|1|Group A
+Height|AVAL ne . and AVAL<=160|<=160 cm|2|Short|2|Group B
+Weight|AVAL>70|>70 kg|3|Heavy|3|Group C
+Weight|AVAL ne . and AVAL<=70|<=70 kg|4|Light|4|Group D
+;
+run;
+
+
+%derive_vars_cat(
+  dataset=advs,
+  definition=definition,
+  by_vars = VSTEST,
+  outdata=advs_test
+);
+
+
+****Test5;
+data adlb;
+  length USUBJID $12 PARAM $10 AVAL 8 AVALU $10 ANRHI 8;
+  infile datalines dlm=',' dsd truncover;
+  input USUBJID $ PARAM $ AVAL AVALU $ ANRHI;
+datalines;
+01-701-1015,ALT,150,U/L,40,
+01-701-1023,ALT,70,U/L,40,
+01-701-1036,ALT,130,U/L,40,
+01-701-1048,ALT,30,U/L,40,
+01-701-1015,AST,50,U/L,35
+;
+run;
+
+
+data definition;
+    length PARAM $10 CONDITION $50 MCRIT1ML $15 MCRIT1MN 8;
+    infile datalines dlm=',' dsd truncover;
+    input PARAM $ CONDITION $ MCRIT1ML $ MCRIT1MN;
+datalines;
+ALT,AVAL <= ANRHI,<=ANRHI,1
+ALT,ANRHI < AVAL & AVAL <= 3 * ANRHI, >1-3*ANRHI,2
+ALT,3 * ANRHI < AVAL, >3*ANRHI,3
+;
+run;
+
+%derive_vars_cat(
+  dataset=adlb,
+  definition=definition,
+  by_vars = PARAM,
+  outdata=adlb_test
+);
+
+
+~~~
+
+### Note:
+
+  - Definition dataset must contain:
+    The column `condition` which will be converted to a logical expression and will be used on the input `dataset` parameter.
+    At least one additional column with the new column name and the category value(s) used by the logical expression.
+    The column specified in `by_vars` (if `by_vars` is specified)
+
+    e.g.
+    condition      AVALCAT1    AVALCA1N
+    AVAL >= 140    >=140 cm     1
+    AVAL < 140     <140 cm      2
+
+  - Parameter `outdata` is an additional (optional) parameter in adamski (not exists in admiral) for the output dataset. 
+    It returns the input dataset with the new category variables added, based on the rules passed in the `definition` dataset for variable categorization.
+  
+  
+### URL:
+
+https://github.com/PharmaForest/adamski
+
+---
+
+Author:          	    Sharad Chhetri
+Latest udpate Date: 	2026-02-28
+
+---
+
+  
+---
+ 
+## `%derive_vars_duration()` macro <a name="derivevarsduration-macro-9"></a> ######
 
 ### Macro:
     %derive_vars_duration
@@ -1330,7 +1518,7 @@ Latest udpate Date: 	2025-11-17
   
 ---
  
-## `%derive_vars_dy()` macro <a name="derivevarsdy-macro-9"></a> ######
+## `%derive_vars_dy()` macro <a name="derivevarsdy-macro-10"></a> ######
 
 ### Macro:
     %derive_vars_dy  
@@ -1374,7 +1562,7 @@ Latest udpate Date: 2025-10-14
   
 ---
  
-## `%derive_vars_joined()` macro <a name="derivevarsjoined-macro-10"></a> ######
+## `%derive_vars_joined()` macro <a name="derivevarsjoined-macro-11"></a> ######
 ### Macro:
     %derive_vars_joined
 
