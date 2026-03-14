@@ -43,7 +43,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_var_obs_number()` | Derive observation sequence number | ✅ Completed! |
 | `derive_var_relative_flag()` | Derive relative flag |  |
 | `derive_var_trtdurd()` | Derive treatment duration (days) |  |
-| `derive_vars_cat()` | Derive categorical variables |  |
+| `derive_vars_cat()` | Derive categorical variables | ✅ Completed! |
 | `derive_vars_computed()` | Compute derived variables |  |
 | `derive_vars_dt()` | Derive date components |  |
 | `derive_vars_dtm()` | Derive datetime variables |  |
