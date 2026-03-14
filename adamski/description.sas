@@ -1,7 +1,7 @@
 Type : Package
 Package : Adamski
 Title : Adamski -- A SAS package of toolkit for CDISC ADaM creation
-Version : 0.0.6
+Version : 0.0.7
 Author : [Yutaka Morioka],[Hiroki Yamanobe],[Ryo Nakaya],[Sharad Chhetri]
 Maintainer : [Yutaka Morioka],[Hiroki Yamanobe],[Ryo Nakaya],[Sharad Chhetri]
 License : Apache license 2.0
@@ -34,6 +34,8 @@ In addition, new functions and macros would be developed to extend the capabilit
 - %derive_var_obs_number() : Adds a sequence number variable to a dataset based on grouping keys and sort order. Useful for creating sequence numbers like `ASEQ`, `AESEQ`, or `CMSEQ`. 
 - %derive_vars_aage() : Derives analysis age variables `AAGE` (numeric) and `AAGEU` (unit) from a start and end date/datetime.  
 - %derive_vars_joined() : Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset.  
+- %derive_vars_cat() : Derive Categorization Variables Like `AVALCATy` and `AVALCAyN` 
+
 
 ### Usage
 For more details, please visit https://github.com/PharmaForest/adamski  
