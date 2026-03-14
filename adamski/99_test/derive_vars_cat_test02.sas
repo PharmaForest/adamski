@@ -67,7 +67,7 @@ run;
 %mp_assertdataset(
   base			= advs_exp,					/* parameter in proc compare */
   compare	= advs_test,					/* parameter in proc compare */
-  desc		= (%nrstr(%derive_vars_cat))[test01] Compare expected and test results in case with by_vars, 	/* description */
+  desc		= (%nrstr(%derive_vars_cat))[test02] Compare expected and test results in case with by_vars, 	/* description */
   id=,						/* parameter in proc compare(e.g. id=USUBJID) */
   by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
   criterion	= 0,       		/* parameter in proc compare */
