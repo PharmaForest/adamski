@@ -50,6 +50,10 @@ Adamski serves as a bridge between open-source R implementations and traditional
  
 - %derive_vars_joined() : ^{newline}
   Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset.  ^{newline}
+
+- %derive_vars_cat() : ^{newline}
+  Derive Categorization Variables Like `AVALCATy` and `AVALCAyN` ^{newline}  
+
   ),
 
   results = TEMP.adamski_test, /* validation results dataset */
