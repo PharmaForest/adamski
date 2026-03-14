@@ -10,12 +10,12 @@
   
 - Package: Adamski
 - Version: 0.0.7
-- Generated: 2026-03-14T16:16:07
+- Generated: 2026-03-14T16:37:30
 - Author(s): [Yutaka Morioka],[Hiroki Yamanobe],[Ryo Nakaya],[Sharad Chhetri]
 - Maintainer(s): [Yutaka Morioka],[Hiroki Yamanobe],[Ryo Nakaya],[Sharad Chhetri]
 - License: Apache license 2.0
-- File SHA256: `F*64AE34AA3967D40C874C1938984303F76A195CF23085CFE9074DF71934228B57` for this version
-- Content SHA256: `C*6AE3D65000E8346523EDBED51F25D7A74095C734C7E921E56DFDA8A2460D4789` for this version
+- File SHA256: `F*469162943CB2244DB0B372B2CBE9271400174BD8682DBE4273414571CECADD19` for this version
+- Content SHA256: `C*AD148D2065C81F5C22247F855ADD7D9521EC3AD444DB4F4658F332AA53CCC53E` for this version
   
 ---
  
