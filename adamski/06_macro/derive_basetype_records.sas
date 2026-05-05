@@ -14,7 +14,7 @@
  							 
  - `conditions` (required)	: Pipe-delimited list of conditions
 
- - `outdata` (optional, default=&dataset._btype): Output dataset with `BASETYPE` variable
+ - `outdata` (optional, default=&dataset._basetype): Output dataset with `BASETYPE` variable
 
 
 ### Sample code:
@@ -114,11 +114,13 @@ run;
     Each value of `BASETYPE` refers to a definition of baseline that characterizes the value of `BASE` on that row.  
     Please see section 4.2.1.6 of the ADaM Implementation Guide, version 1.3 for further details.
  
-  - For each element of `basetypes` the input dataset is subset based upon the provided expression and the 
+  - For each element of `basetypes` the input dataset is subset based upon the provided expression in `conditions` and the 
     `BASETYPE` variable is set to the name of the expression. Here each name becomes a value of `BASETYPE` 
     and each expression defines which records receive that value. A record can match multiple expressions 
     and will be duplicated once for each matching `BASETYPE`. Then, all the subsets are stacked. 
-    Records which do not match any condition are kept and `BASETYPE` is set to `NA`.
+    Records which do not match any condition are kept and `BASETYPE` is set to null.
+    
+  - Set values of `conditions` to 1 if no subset for `basetypes` is needed.
   
   - Parameter `outdata` is an additional (optional) parameter in adamski (not exists in admiral) for the output dataset. 
     It returns the input dataset with the new basetype variable added 
@@ -153,9 +155,9 @@ Latest udpate Date: 	2026-04-19
   %end;
 
 
-  /* check if output datset name is provided - default to &dataset._btype, if not provided */
+  /* check if output datset name is provided - default to &dataset._basetype, if not provided */
   %if %superq(outdata) = %then %do;
-    %let outdata=&dataset._btype;
+    %let outdata=&dataset._basetype;
   %end;
 
 
