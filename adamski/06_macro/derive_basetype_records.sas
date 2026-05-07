@@ -118,7 +118,7 @@ run;
     and each expression defines which records receive that value. A record can match multiple expressions 
     and will be duplicated once for each matching `BASETYPE`. Then, all the subsets are stacked. 
     Records which do not match any condition are kept and `BASETYPE` is set to null.
-
+    
   - Set values of `conditions` to 1 if no subset for `basetypes` is needed.
   
   - Parameter `outdata` is an additional (optional) parameter in adamski (not exists in admiral) for the output dataset. 
