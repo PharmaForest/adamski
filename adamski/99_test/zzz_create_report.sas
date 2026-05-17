@@ -54,6 +54,10 @@ Adamski serves as a bridge between open-source R implementations and traditional
 - %derive_vars_cat() : ^{newline}
   Derive Categorization Variables Like `AVALCATy` and `AVALCAyN` ^{newline}  
 
+- %derive_basetype_records() : ^{newline}
+  Add `BASETYPE` variable to a dataset and duplicates records based upon the provided conditions. ^{newline}
+
+
   ),
 
   results = TEMP.adamski_test, /* validation results dataset */
