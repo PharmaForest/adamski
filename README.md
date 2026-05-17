@@ -1,4 +1,4 @@
-# Adamski (Latest version 0.0.7 on 14Mar2026)
+# Adamski (Latest version 0.0.8 on 17May2026)
 Adamski is a SAS package inspired by the R package {admiral}. It aims to bring the same flexible and modular ADaM derivation framework to the SAS environment. The package follows the {admiral} design principles while adapting to SAS syntax and workflows. It enables consistent, reproducible ADaM dataset creation in compliance with CDISC standards.  
 Adamski serves as a bridge between open-source R implementations and traditional SAS programming.  
 
@@ -577,9 +577,56 @@ run;
 Author:   Sharad Chhetri  
 Latest update Date: 2026-02-28
 
+## %derive_basetype_records()
+
+### Purpose:
+  Add `BASETYPE` variable to a dataset and duplicates records based upon the provided conditions  
+
+### Parameters:
+~~~sas
+ - `dataset` (required)	: Input dataset (with original observations)
+
+ - `basetypes` (required) : Pipe-delimited list: RUN-IN|DOUBLE-BLIND|OPEN-LABEL.
+ 							 
+ - `conditions` (required)	: Pipe-delimited list of conditions
+
+ - `outdata` (optional, default=&dataset._basetype): Output dataset with `BASETYPE` variable
+~~~
+
+### Example usage:
+~~~sas
+data bds;
+  length USUBJID $3 EPOCH $15 PARAMCD $8;
+  input USUBJID $ EPOCH $ PARAMCD $ ASEQ AVAL;
+  datalines;
+   P01    SCREENING    PARAM01     1  10.2
+   P01    RUN-IN       PARAM01     2  10.0
+   P01    RUN-IN       PARAM01     3   9.8
+   P01    DOUBLE-BLIND PARAM01     4   9.2
+   P01    DOUBLE-BLIND PARAM01     5  10.1
+   P02    SCREENING    PARAM01     1  12.2
+   P02    RUN-IN       PARAM01     2  12.1
+   P02    DOUBLE-BLIND PARAM01     3  10.2
+;
+run;
+
+%derive_basetype_records(
+  dataset=bds,
+  basetypes=RUN-IN|DOUBLE-BLIND,
+  conditions=
+    EPOCH in ("RUN-IN","DOUBLE-BLIND") |
+    EPOCH = "DOUBLE-BLIND"
+)
+~~~
+
+Author:   Sharad Chhetri  
+Latest update Date: 2026-04-19
+
+
 ---
  
 ## Version history  
+0.0.8(17May2026) : Added %derive_basetype_records()  
 0.0.7(14March2026) : Added %derive_vars_cat()  
 0.0.6(16February2026) : Added %derive_var_base(), %derive_var_chg(), %derive_var_obs_number(), %derive_vars_aage(), %derive_vars_joined()  
 0.0.5(25December2025) : Added %derive_locf_records()  
