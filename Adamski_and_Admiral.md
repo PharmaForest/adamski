@@ -73,7 +73,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 | Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
-| `derive_basetype_records()` | Create baseline type records |🔧In construction |
+| `derive_basetype_records()` | Create baseline type records |✅ Completed! |
 | `derive_var_analysis_ratio()` | Derive analysis ratios | |
 | `derive_var_anrind()` | Derive reference range indicator | |
 | `derive_var_atoxgr()` | Derive adverse event toxicity grade | |
