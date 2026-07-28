@@ -48,6 +48,19 @@
 ### Sample code:
 
 ~~~sas
+
+data adlb;
+    length USUBJID $12 PARAMCD $8;
+    input USUBJID $ PARAMCD $ AVAL BASE ANRLO ANRHI;
+    datalines;
+SUBJ-001 ALT 25 20 10 40
+SUBJ-002 ALT 30  0 10 40
+SUBJ-003 ALT  . 15 10 40
+SUBJ-004 ALT 45 30  . 60
+SUBJ-005 ALT 50 25 20  .
+;
+run;
+
 %derive_var_analysis_ratio(
     dataset   = adlb,
     numer_var = AVAL,
@@ -98,48 +111,48 @@ Latest update Date:    	      2026-07-04
     %let _error = 0;
 
     /* Check required parameters */
-    %if %superq(dataset) = %then 
+    %if %superq(dataset) = %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Required parameter dataset is missing.;
             %let _error = 1;
         %end;
 
-    %if %superq(numer_var) = %then 
+    %if %superq(numer_var) = %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Required parameter numer_var is missing.;
             %let _error = 1;
         %end;
 
-    %if %superq(denom_var) = %then 
+    %if %superq(denom_var) = %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Required parameter denom_var is missing.;
             %let _error = 1;
         %end;
 
-    %if &_error = 1 %then 
+    %if &_error = 1 %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Macro execution stopped due to missing required parameter(s).;
             %return;
         %end;
 
     /* Default output dataset */
-    %if %superq(outdata) = %then 
+    %if %superq(outdata) = %then
         %do;
             %let outdata = &dataset;
         %end;
 
     /* Default new variable name */
-    %if %superq(new_var) = %then 
+    %if %superq(new_var) = %then
         %do;
             %let _new_var = R2&denom_var;
         %end;
-    %else 
+    %else
         %do;
             %let _new_var = &new_var;
         %end;
 
     /* Check input dataset exists */
-    %if not %sysfunc(exist(&dataset)) %then 
+    %if not %sysfunc(exist(&dataset)) %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Input dataset &dataset does not exist.;
             %return;
@@ -148,7 +161,7 @@ Latest update Date:    	      2026-07-04
     /* Check input variables exist */
     %let _dsid = %sysfunc(open(&dataset));
 
-    %if &_dsid = 0 %then 
+    %if &_dsid = 0 %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Unable to open input dataset &dataset..;
             %return;
@@ -158,19 +171,19 @@ Latest update Date:    	      2026-07-04
     %let _num_denom = %sysfunc(varnum(&_dsid, &denom_var));
     %let _rc = %sysfunc(close(&_dsid));
 
-    %if &_num_numer = 0 %then 
+    %if &_num_numer = 0 %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Variable &numer_var not found in input dataset &dataset..;
             %let _error = 1;
         %end;
 
-    %if &_num_denom = 0 %then 
+    %if &_num_denom = 0 %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Variable &denom_var not found in input dataset &dataset..;
             %let _error = 1;
         %end;
 
-    %if &_error = 1 %then 
+    %if &_error = 1 %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Macro execution stopped due to invalid input variable(s).;
             %abort cancel;
