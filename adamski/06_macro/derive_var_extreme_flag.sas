@@ -321,7 +321,7 @@ Latest udpate Date: 	2026-06-25
 		
 		/* Create group counts - number of records in the group */
 		data _tmp_counts;
-		    set _tmp_flag;
+		    set _tmp_flag(keep=&by_vars);
 		    by &by_vars;
 		
 		    retain _n_in_group;
@@ -360,7 +360,10 @@ Latest udpate Date: 	2026-06-25
         proc sort data=_tmp_flag;
             by &by_vars &order;
         run;
-
+		
+		/* pick the last variable in the order */
+		%let last_order_var = %scan(&order, %sysfunc(countw(%superq(order))));
+		
         data _tmp_flag;
             set _tmp_flag;
             by &by_vars &order;
@@ -368,7 +371,8 @@ Latest udpate Date: 	2026-06-25
             retain _last_flag;
             length _last_flag $20;
 
-            if first.%scan(&order, 1) then _last_flag = &new_var;
+            /* retian the first value with non missing value */
+            if first.&last_order_var then _last_flag = &new_var;          
 
             /* Propagate flag across tied records */
             if missing(&new_var) or &new_var = "" then &new_var = _last_flag;
