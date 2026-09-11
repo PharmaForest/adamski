@@ -21,42 +21,53 @@ Adamski serves as a bridge between open-source R implementations and traditional
   ),  /* for general description of package */
 
   requirements = %nrstr(
-- %derive_vars_dy :  ^{newline}
-  Generates study day (DY) variables from given date variables using a specified reference date, for example TRTSDT. ^{newline}
-
-- %derive_var_merged_exist_flag :  ^{newline}
-  Creates a character flag variable indicating whether the current DATA step row`s keys exist in another dataset. ^{newline}
-
-- %derive_var_age_years : ^{newline}
-  Converts a set of age values from the specified time unit to years. ^{newline}
-
-- %derive_vars_duration : ^{newline}
-  Derives duration between two dates, specified by the variables present in the input dataset, for example duration of adverse events, relative day, age, etc..  ^{newline}
-
-- %derive_locf_records : ^{newline}
-  Adds LOCF records (Last Observation Carried Forward) to a dataset based on an `expected observations` reference dataset. ^{newline}
-
-- %derive_var_base() : ^{newline}
-  Derive baseline variables (e.g. BASE, BASEC, BNRIND) in a BDS dataset. ^{newline}
- 
-- %derive_var_chg() : ^{newline}
-  Derive Change from Baseline (CHG) in a BDS-style dataset. ^{newline} 
-
-- %derive_var_obs_number() : ^{newline}
-  Adds a sequence number variable to a dataset based on grouping keys and sort order. Useful for creating sequence numbers like `ASEQ`, `AESEQ`, or `CMSEQ`. ^{newline}
-
-- %derive_vars_aage() : ^{newline}
-  Derives analysis age variables `AAGE` (numeric) and `AAGEU` (unit) from a start and end date/datetime. ^{newline}
- 
-- %derive_vars_joined() : ^{newline}
-  Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset.  ^{newline}
-
-- %derive_vars_cat() : ^{newline}
-  Derive Categorization Variables Like `AVALCATy` and `AVALCAyN` ^{newline}  
-
 - %derive_basetype_records() : ^{newline}
   Add `BASETYPE` variable to a dataset and duplicates records based upon the provided conditions. ^{newline}
-
+^{newline}
+- %derive_locf_records : ^{newline}
+  Adds LOCF records (Last Observation Carried Forward) to a dataset based on an `expected observations` reference dataset. ^{newline}
+^{newline}
+- %derive_var_age_years : ^{newline}
+  Converts a set of age values from the specified time unit to years. ^{newline}
+^{newline}
+- %derive_var_analysis_ratio() : ^{newline}
+  Derives an analysis ratio variable for a BDS dataset using a numerator and denominator variable. ^{newline}
+^{newline}
+- %derive_var_base() : ^{newline}
+  Derive baseline variables (e.g. BASE, BASEC, BNRIND) in a BDS dataset. ^{newline}
+^{newline}
+- %derive_var_chg() : ^{newline}
+  Derive Change from Baseline (CHG) in a BDS-style dataset. ^{newline}
+^{newline}
+- %derive_var_extreme_flag() : ^{newline}
+  Derives a flag for the first or last observation within each BY group based on the specified ORDER variables. ^{newline}
+^{newline}
+- %derive_var_merged_exist_flag : ^{newline}
+  Creates a character flag variable indicating whether the current DATA step row`s keys exist in another dataset. ^{newline}
+^{newline}
+- %derive_var_obs_number() : ^{newline}
+  Adds a sequence number variable to a dataset based on grouping keys and sort order. Useful for creating sequence numbers like `ASEQ`, `AESEQ`, or `CMSEQ`. ^{newline}
+^{newline}
+- %derive_var_pchg() : ^{newline}
+  Derives Percent Change from Baseline (PCHG) in a BDS-style dataset. ^{newline}
+^{newline}
+- %derive_var_trtdurd() : ^{newline}
+  Derives total treatment duration in days (`TRTDURD`) from treatment start and end dates using inclusive day counting. ^{newline}
+^{newline}
+- %derive_vars_aage() : ^{newline}
+  Derives analysis age variables `AAGE` (numeric) and `AAGEU` (unit) from a start and end date/datetime. ^{newline}
+^{newline}
+- %derive_vars_cat() : ^{newline}
+  Derive Categorization Variables Like `AVALCATy` and `AVALCAyN` ^{newline}
+^{newline}
+- %derive_vars_duration : ^{newline}
+  Derives duration between two dates, specified by the variables present in the input dataset, for example duration of adverse events, relative day, age, etc.. ^{newline}
+^{newline}
+- %derive_vars_dy : ^{newline}
+  Generates study day (DY) variables from given date variables using a specified reference date, for example TRTSDT. ^{newline}
+^{newline}
+- %derive_vars_joined() : ^{newline}
+  Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset. ^{newline}
 
   ),
 
