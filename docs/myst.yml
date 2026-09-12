@@ -19,13 +19,13 @@ project:
     - file: index.md
     - file: macro.md
  
-# Site options allow you to configure a theme’s behavior.
+# Site options allow you to configure a themeâ€™s behavior.
 # https://mystmd.org/guide/website-templates
 site:
   template: book-theme
   title: Adamski -- A SAS package of toolkit for CDISC ADaM creation
   options:
-    # logo: pkg_image.png
+    logo: adamski_logo.png
     logo_text: Adamski
     style: style.css
   # actions:
