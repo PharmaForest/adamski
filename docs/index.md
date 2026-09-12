@@ -39,22 +39,22 @@ In addition, new functions and macros would be developed to extend the capabilit
 **Please see notice.sas in additional contents(addcnt) in addition to license.sas**
 
 ### Main Features
-- %derive_basetype_records() : Add `BASETYPE` variable to a dataset and duplicates records based upon the provided conditions.  
-- %derive_locf_records() : Add LOCF records (Last Observation Carried Forward) to a dataset based on an "expected observations" reference dataset  
-- %derive_var_age_years() : Creates age variable with unit of year  
-- %derive_var_analysis_ratio() : Derives an analysis ratio variable for a BDS dataset using a numerator and denominator variable.  
-- %derive_var_base() : Derive baseline variables (e.g. BASE, BASEC, BNRIND) in a BDS dataset.  
-- %derive_var_chg() : Derive Change from Baseline (CHG) in a BDS-style dataset.  
-- %derive_var_extreme_flag() : Derives a flag for the first or last observation within each BY group based on the specified ORDER variables.  
-- %derive_var_merged_exist_flag() :  Creates a character flag variable indicating whether the current DATA step row's key(s) exist in another dataset.  
-- %derive_var_obs_number() : Adds a sequence number variable to a dataset based on grouping keys and sort order. Useful for creating sequence numbers like `ASEQ`, `AESEQ`, or `CMSEQ`.  
-- %derive_var_pchg() : Derives Percent Change from Baseline (PCHG) in a BDS-style dataset.  
-- %derive_var_trtdurd() : Derives total treatment duration in days (`TRTDURD`) from treatment start and end dates using inclusive day counting.  
-- %derive_vars_aage() : Derives analysis age variables `AAGE` (numeric) and `AAGEU` (unit) from a start and end date/datetime.  
-- %derive_vars_cat() : Derive Categorization Variables Like `AVALCATy` and `AVALCAyN`.  
-- %derive_vars_duration() : Derives duration between two dates, specified by the variables present in the input dataset (e.g., duration of adverse events, relative day, age, etc.).  
-- %derive_vars_dy() : Calculates DY variables.  
-- %derive_vars_joined() : Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset.  
+- `%derive_basetype_records()` : Add `BASETYPE` variable to a dataset and duplicates records based upon the provided conditions.  
+- `%derive_locf_records()` : Add LOCF records (Last Observation Carried Forward) to a dataset based on an "expected observations" reference dataset  
+- `%derive_var_age_years()` : Creates age variable with unit of year  
+- `%derive_var_analysis_ratio()` : Derives an analysis ratio variable for a BDS dataset using a numerator and denominator variable.  
+- `%derive_var_base()` : Derive baseline variables (e.g. BASE, BASEC, BNRIND) in a BDS dataset.  
+- `%derive_var_chg()` : Derive Change from Baseline (CHG) in a BDS-style dataset.  
+- `%derive_var_extreme_flag()` : Derives a flag for the first or last observation within each BY group based on the specified ORDER variables.  
+- `%derive_var_merged_exist_flag()` :  Creates a character flag variable indicating whether the current DATA step row's key(s) exist in another dataset.  
+- `%derive_var_obs_number()` : Adds a sequence number variable to a dataset based on grouping keys and sort order. Useful for creating sequence numbers like `ASEQ`, `AESEQ`, or `CMSEQ`.  
+- `%derive_var_pchg()` : Derives Percent Change from Baseline (PCHG) in a BDS-style dataset.  
+- `%derive_var_trtdurd()` : Derives total treatment duration in days (`TRTDURD`) from treatment start and end dates using inclusive day counting.  
+- `%derive_vars_aage()` : Derives analysis age variables `AAGE` (numeric) and `AAGEU` (unit) from a start and end date/datetime.  
+- `%derive_vars_cat()` : Derive Categorization Variables Like `AVALCATy` and `AVALCAyN`.  
+- `%derive_vars_duration()` : Derives duration between two dates, specified by the variables present in the input dataset (e.g., duration of adverse events, relative day, age, etc.).  
+- `%derive_vars_dy()` : Calculates DY variables.  
+- `%derive_vars_joined()` : Performs a hash-based lookup (left-join style) from the current DATA step row to an external dataset.  
 
 ### Usage
 For more details, please visit https://github.com/PharmaForest/adamski  
