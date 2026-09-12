@@ -36,13 +36,13 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 | Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
-| `derive_var_extreme_flag()` | Create extreme value flag | 🔧In construction |
+| `derive_var_extreme_flag()` | Create extreme value flag | ✅ Completed! |
 | `derive_var_joined_exist_flag()` | Create flag for joined existence |  |
 | `derive_var_merged_ef_msrc()` | Merge and derive event flag by source |  |
 | `derive_var_merged_exist_flag()` | Merge and derive existence flag | ✅ Completed! |
 | `derive_var_obs_number()` | Derive observation sequence number | ✅ Completed! |
 | `derive_var_relative_flag()` | Derive relative flag | 🔧In construction |
-| `derive_var_trtdurd()` | Derive treatment duration (days) | 🔧In construction |
+| `derive_var_trtdurd()` | Derive treatment duration (days) | ✅ Completed! |
 | `derive_vars_cat()` | Derive categorical variables | ✅ Completed! |
 | `derive_vars_computed()` | Compute derived variables |  |
 | `derive_vars_dt()` | Derive date components |  |
@@ -74,7 +74,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 
 | Function | Description | Development in Adamski |
 |-----------|-------------|-------------|
-| `derive_var_analysis_ratio()` | Derive analysis ratios | 🔧In construction |
+| `derive_var_analysis_ratio()` | Derive analysis ratios | ✅ Completed! |
 | `derive_var_anrind()` | Derive reference range indicator |  |
 | `derive_var_atoxgr()` | Derive adverse event toxicity grade |  |
 | `derive_var_atoxgr_dir()` | Derive directional adverse event toxicity grade |  |
@@ -82,7 +82,7 @@ These functions serve as a reference for creating equivalent SAS macros in the *
 | `derive_var_chg()` | Derive change from baseline | ✅ Completed! |
 | `derive_var_nfrlt()` | Derive normal/reference result indicator |  |
 | `derive_var_ontrtfl()` | Derive on-treatment flag |  |
-| `derive_var_pchg()` | Derive percent change | 🔧In construction |
+| `derive_var_pchg()` | Derive percent change | ✅ Completed! |
 | `derive_var_shift()` | Derive shift table variables |  |
 | `derive_vars_crit_flag()` | Derive criteria flags |  |
 
