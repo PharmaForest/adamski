@@ -1,0 +1,79 @@
+name: Docs (Jupyter Book/Sphinx) GitHub Pages Deploy
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      builder:
+        description: 'Docs builder to use (auto, jupyterbook, sphinx)'
+        required: false
+        default: 'auto'
+env:
+  BASE_URL: /${{ github.event.repository.name }}
+ 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      - name: Detect docs builder
+        id: detect
+        run: |
+          set -euo pipefail
+          builder_input="${{ inputs.builder ||'auto'}}"
+          if [[ "$builder_input" != "auto" ]]; then
+            echo "builder=$builder_input" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+ 
+          if [[ -f "docs/myst.yml" ]]; then
+            echo "builder=jupyterbook" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+ 
+          if [[ -f 'docs/conf.py' ]]; then
+            echo "builder=sphinx" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+ 
+          echo "No docs/myst.yml or docs/conf.py found. Please add one or select a builder." >&2
+          exit 1
+      - name: Install Jupyter Book (via myst)
+        if: steps.detect.outputs.builder == 'jupyterbook'
+        run: npm install -g jupyter-book
+      - name: Install Sphinx
+        if: steps.detect.outputs.builder == 'sphinx' 
+        run: python -m pip install --upgrade pip sphinx myst-nb sphinx-book-theme sphinx-rtd-theme
+      - name: Build HTML Assets (Jupyter Book)
+        if: steps.detect.outputs.builder == 'jupyterbook'
+        run: jupyter-book build --html
+        working-directory: docs
+      - name: Build HTML Assets (Sphinx)
+        if: steps.detect.outputs.builder == 'sphinx'
+        run: sphinx-build -b html docs docs/_build/html
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs/_build/html'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
