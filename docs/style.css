@@ -1,0 +1,3 @@
+/* Modify SAS Html styles conflicting with Jupyter Book styles */
+a:link, a:visited {color:inherit !important;}
+.jp-OutputArea table.table{color: rgba(0, 0, 0, .87);}
