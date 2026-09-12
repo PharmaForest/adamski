@@ -32,9 +32,44 @@ data t_data;
 	;
 run;
 
+/* To collect expected errors */
+%let error1_found=0;
+%let error2_found=0;
+%let abort_found=0;
+
+filename testlog temp;
+
+proc printto log=testlog new;
+run;
+
 /* ANRHI does not exist in t_data */
 %derive_var_analysis_ratio(
     dataset   = t_data,
     numer_var = AVAL,
     denom_var = ANRHI
 	);
+
+proc printto;
+run;
+
+data _null_;
+  infile testlog truncover;
+  input line $char1000.;
+
+  /* 1. Missing variable */
+  if index(line, 'ERROR: derive_var_analysis_ratio: Variable ANRHI not found') > 0 then
+    call symputx('error1_found', 1);
+
+  /* 2. Macro stopped due to invalid input */
+  if index(line, 'ERROR: derive_var_analysis_ratio: Macro execution stopped due to invalid input variable(s).') > 0 then
+    call symputx('error2_found', 1);
+run;
+
+%mp_assert(
+  iftrue=(
+    &error1_found = 1
+    and &error2_found = 1
+  ),
+  desc=(%nrstr(%derive_var_analysis_ratio))[test02] Check if expected errors are output,
+  outds=TEMP.adamski_test
+)

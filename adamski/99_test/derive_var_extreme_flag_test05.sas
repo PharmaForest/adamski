@@ -43,14 +43,14 @@ data adae_exp;
           AESEV    :$10.
           AESTDY
           AESEQ
-          AOCCIFL  :$1.;
+          AOCCIFL  :$20.;
 
 datalines;
 AB123|1015|ERYTHEMA|MILD|2|1|Y
 AB123|1015|PRURITUS|MILD|2|2|Y
 AB123|1015|DIARRHOEA|MILD|8|3|
-AB123|1023|ERYTHEMA|MILD|3|1|
 AB123|1023|ERYTHEMA|SEVERE|5|2|Y
+AB123|1023|ERYTHEMA|MILD|3|1|
 AB123|1023|ERYTHEMA|MILD|8|3|
 AB123|1023|AV BLOCK|MILD|22|4|
 ;
@@ -85,7 +85,7 @@ run;
 %mp_assertdataset(
   base			= adae_exp,					/* parameter in proc compare */
   compare	= adae_out,					/* parameter in proc compare */
-  desc		= (%nrstr(%derive_var_extreme_flag))[test01] Compare expected and test results, 	/* description */
+  desc		= (%nrstr(%derive_var_extreme_flag))[test05] Compare expected and test results, 	/* description */
   id=,						/* parameter in proc compare(e.g. id=USUBJID) */
   by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
   criterion	= 1e-8,       		/* parameter in proc compare */

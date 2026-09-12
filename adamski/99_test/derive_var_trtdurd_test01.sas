@@ -38,7 +38,7 @@ data duration_exp;
     format trtsdt trtedt date9.;
 run;
 
-%derive_var_trtdurd(duration);
+%derive_var_trtdurd(dataset=duration);
 
 /*Compare*/
 %mp_assertdataset(

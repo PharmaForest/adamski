@@ -112,7 +112,7 @@ run;
 %mp_assertdataset(
   base			= advs_exp,					/* parameter in proc compare */
   compare	= advs_out,					/* parameter in proc compare */
-  desc		= (%nrstr(%derive_var_extreme_flag))[test01] Compare expected and test results, 	/* description */
+  desc		= (%nrstr(%derive_var_extreme_flag))[test06] Compare expected and test results, 	/* description */
   id=,						/* parameter in proc compare(e.g. id=USUBJID) */
   by=,      	            /* parameter in proc compare(e.g. by=USUBJID VISIT) */
   criterion	= 1e-8,       		/* parameter in proc compare */
