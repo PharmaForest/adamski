@@ -1,4 +1,4 @@
-# Adamski (Latest version 0.0.8 on 17May2026)
+# Adamski (Latest version 0.0.9 on 12September2026)
 Adamski is a SAS package inspired by the R package {admiral}. It aims to bring the same flexible and modular ADaM derivation framework to the SAS environment. The package follows the {admiral} design principles while adapting to SAS syntax and workflows. It enables consistent, reproducible ADaM dataset creation in compliance with CDISC standards.  
 Adamski serves as a bridge between open-source R implementations and traditional SAS programming.  
 
@@ -626,6 +626,7 @@ Latest update Date: 2026-04-19
 ---
  
 ## Version history  
+0.0.9(12September2026) : Added %derive_var_extreme_flag(), %derive_var_trtdurd(), %derive_var_analysis_ratio(), % derive_var_pchg()  
 0.0.8(17May2026) : Added %derive_basetype_records()  
 0.0.7(14March2026) : Added %derive_vars_cat()  
 0.0.6(16February2026) : Added %derive_var_base(), %derive_var_chg(), %derive_var_obs_number(), %derive_vars_aage(), %derive_vars_joined()  
