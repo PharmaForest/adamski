@@ -93,7 +93,7 @@ https://github.com/PharmaForest/adamski
 
 ---
 Author:                 	  Manivannan Mathialagan
-Latest update Date:    	      2026-07-04
+Latest update Date:    	      2026-09-12
 ---
 
 *//*** HELP END ***/
@@ -186,7 +186,7 @@ Latest update Date:    	      2026-07-04
     %if &_error = 1 %then
         %do;
             %put ERROR: derive_var_analysis_ratio: Macro execution stopped due to invalid input variable(s).;
-            %abort cancel;
+            %return;
         %end;
 
     /* Derive ratio variable */
