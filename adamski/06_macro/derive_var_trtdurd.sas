@@ -39,7 +39,7 @@ run;
     https://github.com/PharmaForest/adamski
 
 Author: Uma Balasubramanian
-Latest update Date: 21Jul2026
+Latest update Date: 12September2026
 */
 /*** HELP END ***/
 
@@ -50,7 +50,7 @@ end_date=TRTEDT
 /* check required parameters */
 %if %superq(dataset)= %then %do;
 %put ERROR: Required parameter missing. dataset= is required.;
-%abort cancel;
+%return;
 %end;
 
 data &dataset;
