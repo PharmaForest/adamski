@@ -218,6 +218,21 @@ Latest update Date:     29Sep2026
         %return;
     %end;
 
+    %if not %sysfunc(exist(&dataset))%then %do;
+    %put ERROR: input dataset &dataset does not exist. please provide correct dataset name.;
+    %return;
+    %end;
+    
+    %local dsid varcheck rc;
+    %let dsid = %sysfunc(open(&dataset));
+    %let varcheck = %sysfunc(varnum(&dsid, %scan(&condition, 1, %str( ))));
+    %let rc = %sysfunc(close(&dsid));
+    
+    %if &varcheck = 0 %then %do;
+    %put ERROR: Variable %scan(&condition, 1, %str( )) referenced in condition does not exist in dataset &dataset.;
+    %return;
+    %end;
+
     /* default output dataset name */
     %if %superq(outdata)= %then %let outdata = &dataset._relative;
 
