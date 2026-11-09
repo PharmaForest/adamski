@@ -92,6 +92,9 @@ Parameters:
         references using the .join suffix. These variables must exist in
         DATASET_ADD. Example:
             join_vars = ACOVFL ADY
+    - `first_cond_lower` / `first_cond_upper` (optional) :
+        SAS condition defining the nearest inclusive boundary for BEFORE/AFTER joins.
+        References to JOIN_VARS use the .join suffix.
     - `filter_add` (optional) :
         SAS SQL condition applied to observations from `dataset_add`
         before the join is performed.
@@ -127,19 +130,19 @@ Parameters:
         If not specified, the input dataset is overwritten.
 R alignment:
     - The following Admiral R parameters are not implemented:
-        tmp_obs_nr_var, first_cond_lower, first_cond_upper, check_type.
+        tmp_obs_nr_var, check_type.
     - tmp_obs_nr_var: R supports order-based temporary observation numbers
       for conditions; SAS currently creates internal row identifiers only.
     - join_vars: Joined-record variables can be referenced with the .join
       suffix in FILTER_JOIN, as in Admiral R. This SAS macro translates
       those references to temporary SAS variable names.
-    - first_cond_lower / first_cond_upper: R restricts the join to a
-      condition-defined range; these range boundaries are not implemented.
+    - first_cond_lower / first_cond_upper: Restrict BEFORE/AFTER joins to
+      the nearest qualifying boundary (inclusive).
     - check_type: R controls duplicate BY/ORDER diagnostics; configurable
       duplicate checks are not implemented in this SAS macro.
     - filter_add filters DATASET_ADD before joining; filter_join evaluates
       the current and joined records together. R-specific grouped summary
-      functions and range-boundary options are not implemented.
+      functions other than a single ALL(expression) are not implemented.
     - value_type (SAS-specific parameter): This parameter was introduced 
       in the SAS implementation to explicitly control whether the derived 
       flag variable is character (C) or numeric (N). Unlike R, where the 
@@ -372,13 +375,15 @@ Latest update Date:         2026-10-18
     join_vars        = ,
     filter_add       = ,
     filter_join      = ,
+    first_cond_lower = ,
+    first_cond_upper = ,
     true_value       = Y,
     false_value      = ,
     value_type       = C,
     new_var_length   = 1,
     outdata          =
 );
-%local _error _dsid_a _dsid_b _rc _join_type _value_type _nby _norder _i _j _var _varnum_a _varnum_b _vartype_a _vartype_b _by_condition _order_condition _prefix_equal _src _add _src_filtered _add_filtered _src_final _matched _result _new_var_num _lib_a _lib_b _mem_a _mem_b _same_dataset _njoin _join_var _join_filter _join_select _joined _join_name _join_num _src_join_num;
+%local _error _dsid_a _dsid_b _rc _join_type _value_type _nby _norder _i _j _var _varnum_a _varnum_b _vartype_a _vartype_b _by_condition _order_condition _prefix_equal _src _add _src_filtered _add_filtered _src_final _matched _result _new_var_num _lib_a _lib_b _mem_a _mem_b _same_dataset _njoin _join_var _join_filter _join_select _joined _join_name _join_num _src_join_num _boundary_cond _boundary_select _sort_order _all_expr _row_expr _has_all _has_boundary _boundary_mode _all_start _all_end _depth _pos _flen _chr _prefix _suffix _all_text _agg_n _agg_select _agg_columns _parse_error _check_type;
     %let _error = 0;
     /* Temporary dataset names */
     %let _src = work._adsk_jef_src;
@@ -744,10 +749,159 @@ Latest update Date:         2026-10-18
         %let _join_filter = %sysfunc(tranwrd(%superq(_join_filter), &_join_var..JOIN, &_join_var._join));
     %end;
 
+    /* Translate boundary conditions and include joined ORDER columns. */
+    %let _boundary_cond = ;
+    %let _boundary_mode = ;
+    %if %superq(first_cond_lower) ne %then %do;
+        %if &_join_type ne before %then %do;
+            %put ERROR: first_cond_lower requires join_type=before.;
+            %return;
+        %end;
+        %let _boundary_cond = %superq(first_cond_lower);
+        %let _boundary_mode = lower;
+    %end;
+    %if %superq(first_cond_upper) ne %then %do;
+        %if &_join_type ne after or %superq(_boundary_mode) ne %then %do;
+            %put ERROR: first_cond_upper requires join_type=after and cannot be combined with first_cond_lower.;
+            %return;
+        %end;
+        %let _boundary_cond = %superq(first_cond_upper);
+        %let _boundary_mode = upper;
+    %end;
+    %if %superq(_boundary_mode) ne %then %do;
+        %do _i = 1 %to &_njoin;
+            %let _join_var = %scan(%superq(join_vars), &_i, %str( ));
+            %let _boundary_cond = %sysfunc(tranwrd(%superq(_boundary_cond), &_join_var..join, &_join_var._join));
+            %let _boundary_cond = %sysfunc(tranwrd(%superq(_boundary_cond), &_join_var..JOIN, &_join_var._join));
+        %end;
+    %end;
+    %let _boundary_select = , b._adsk_add_obs_id;
+    %let _sort_order = _adsk_obs_id;
+    %if %superq(_boundary_mode) ne %then %do;
+        %do _i = 1 %to &_norder;
+            %let _var = %scan(%superq(order), &_i, %str( ));
+            %let _boundary_select = &_boundary_select, b.&_var as _adsk_ord&_i;
+            %if &_boundary_mode = lower %then %let _sort_order = &_sort_order descending _adsk_ord&_i;
+            %else %let _sort_order = &_sort_order _adsk_ord&_i;
+        %end;
+    %end;
+    /* Parse grouped predicates in FILTER_JOIN, preserving nested arguments. */
+    %let _agg_n = 0;
+    %let _agg_select = ;
+    %let _agg_columns = ;
+    %let _parse_error = 0;
+    %let _row_expr = %superq(_join_filter);
+    data _null_;
+        length src rewritten func args part var cond val expression selection prefix suffix $32767;
+        length ch quote $1;
+        src = symget('_join_filter');
+        n = 0;
+        do until (done);
+            done = 1;
+            start = 0;
+            /* Locate the leftmost supported grouped function. */
+            rx = prxparse('/\b(all|any|count_vals|min_cond|max_cond)\s*\(/i');
+            if prxmatch(rx,src) then do;
+                call prxsubstr(rx,src,start,matched_length);
+                func = lowcase(strip(scan(substr(src,start,matched_length),1,' (')));
+                openpos = start + matched_length - 1;
+                depth = 1;
+                quote = ' ';
+                finish = 0;
+                do i = openpos + 1 to lengthn(src);
+                    ch = substr(src,i,1);
+                    if quote ne ' ' then do;
+                        if ch = quote then quote = ' ';
+                    end;
+                    else if ch in ('"',"'") then quote = ch;
+                    else if ch = '(' then depth + 1;
+                    else if ch = ')' then do;
+                        depth + (-1);
+                        if depth = 0 then do;
+                            finish = i;
+                            leave;
+                        end;
+                    end;
+                end;
+                if finish = 0 then do;
+                    put 'ERROR: [derive_var_joined_exist_flag] Unbalanced grouped function: ' func;
+                    call symputx('_parse_error',1,'L');
+                    stop;
+                end;
+                args = strip(substr(src,openpos+1,finish-openpos-1));
+                n + 1;
+                var = ''; cond = ''; val = '';
+                if func in ('all','any') then do;
+                    if func = 'all' then expression = cats('min(case when (',args,') then 1 else 0 end)');
+                    else expression = cats('max(case when (',args,') then 1 else 0 end)');
+                end;
+                else do;
+                    /* Named arguments are split at top-level commas only. */
+                    depth = 0; quote = ' '; piece_start = 1;
+                    do i = 1 to lengthn(args)+1;
+                        if i > lengthn(args) then ch = ',';
+                        else ch = substr(args,i,1);
+                        if quote ne ' ' then do;
+                            if ch = quote then quote = ' ';
+                        end;
+                        else if ch in ('"',"'") then quote = ch;
+                        else if ch = '(' then depth + 1;
+                        else if ch = ')' then depth + (-1);
+                        else if ch = ',' and depth = 0 then do;
+                            part = strip(substr(args,piece_start,i-piece_start));
+                            eq = index(part,'=');
+                            if eq > 0 then do;
+                                selection = lowcase(strip(substr(part,1,eq-1)));
+                                if selection = 'var' then var = strip(substr(part,eq+1));
+                                else if selection = 'val' then val = strip(substr(part,eq+1));
+                                else if selection = 'cond' then cond = strip(substr(part,eq+1));
+                            end;
+                            piece_start = i + 1;
+                        end;
+                    end;
+                    if missing(var) or (func = 'count_vals' and missing(val)) or (func ne 'count_vals' and missing(cond)) then do;
+                        put 'ERROR: [derive_var_joined_exist_flag] Missing named argument for ' func;
+                        call symputx('_parse_error',1,'L');
+                        stop;
+                    end;
+                    if func = 'count_vals' then expression = cats('sum(case when (',var,' = ',val,') then 1 else 0 end)');
+                    else if func = 'min_cond' then expression = catx(' ',cats('min(case when (',cond,')'),'then',var,'else . end)');
+                    else expression = catx(' ',cats('max(case when (',cond,')'),'then',var,'else . end)');
+                end;
+                call symputx(cats('_adsk_ag_expr',n),expression,'L');
+                prefix = ''; suffix = '';
+                if start > 1 then prefix = substr(src,1,start-1);
+                if finish < lengthn(src) then suffix = substr(src,finish+1);
+                rewritten = catx(' ',trimn(prefix),cats('_adsk_ag',n),strip(suffix));
+                if rewritten = src or n > 100 then do;
+                    put 'ERROR: [derive_var_joined_exist_flag] Grouped predicate parser made no progress.';
+                    call symputx('_parse_error',1,'L');
+                    stop;
+                end;
+                src = rewritten;
+                done = 0;
+            end;
+            call prxfree(rx);
+        end;
+        /* R parity: missing grouped extrema must not satisfy SAS numeric comparisons.
+           Guard comparisons between grouped results before SQL WHERE evaluation.
+           In SAS, 12 > . is true; in R, 12 > NA is NA and filter() drops it. */
+        rx_compare = prxparse('/\b(_adsk_ag\d+)\s*(>=|<=|<>|!=|~=|=|>|<)\s*(_adsk_ag\d+)\b/i');
+        if prxmatch(rx_compare,src) then
+            src = prxchange('s/\b(_adsk_ag\d+)\s*(>=|<=|<>|!=|~=|=|>|<)\s*(_adsk_ag\d+)\b/((not missing($1)) and (not missing($3)) and ($1 $2 $3))/i',-1,src);
+        call prxfree(rx_compare);
+        call symputx('_row_expr',src,'L');
+        call symputx('_agg_n',n,'L');
+    run;
+    %if &_parse_error %then %return;
+    %do _i = 1 %to &_agg_n;
+        %let _agg_select = &_agg_select, &&_adsk_ag_expr&_i as _adsk_ag&_i;
+        %let _agg_columns = &_agg_columns, b._adsk_ag&_i;
+    %end;
     /* Join current and additional observations within the BY group. */
     proc sql;
         create table &_joined as
-        select a.* &_join_select
+        select a.* &_join_select &_boundary_select
         from &_src_filtered as a
         inner join &_add_filtered as b
             on &_by_condition
@@ -760,17 +914,68 @@ Latest update Date:         2026-10-18
         ;
     quit;
 
-    /* Evaluate FILTER_JOIN on each current/joined observation pair. */
+    /* Limit the joined window to the nearest qualifying boundary, inclusive. */
+    %if %superq(_boundary_mode) ne %then %do;
+        proc sort data=&_joined;
+            by &_sort_order;
+        run;
+        data work._adsk_jef_window;
+            set &_joined;
+            by _adsk_obs_id;
+            retain _adsk_stopped;
+            if first._adsk_obs_id then _adsk_stopped = 0;
+            if not _adsk_stopped then do;
+                _adsk_boundary_hit = (&_boundary_cond);
+                output;
+                if _adsk_boundary_hit then _adsk_stopped = 1;
+            end;
+        run;
+        /* A window without a boundary does not qualify. */
+        proc sql;
+            create table work._adsk_jef_valid as
+            select _adsk_obs_id
+            from work._adsk_jef_window
+            group by _adsk_obs_id
+            having max(_adsk_boundary_hit) = 1;
+            create table work._adsk_jef_eval as
+            select a.* from work._adsk_jef_window as a
+            inner join work._adsk_jef_valid as b
+                on a._adsk_obs_id = b._adsk_obs_id;
+        quit;
+    %end;
+    %else %do;
+        data work._adsk_jef_eval;
+            set &_joined;
+        run;
+    %end;
+    /* Aggregate grouped helpers over the entire bounded window. */
+    %if &_agg_n > 0 %then %do;
+        proc sql;
+            create table work._adsk_jef_agg as
+            select _adsk_obs_id &_agg_select
+            from work._adsk_jef_eval
+            group by _adsk_obs_id;
+            create table work._adsk_jef_eval2 as
+            select a.* &_agg_columns
+            from work._adsk_jef_eval as a
+            inner join work._adsk_jef_agg as b
+            on a._adsk_obs_id = b._adsk_obs_id;
+        quit;
+    %end;
+    %else %do;
+        data work._adsk_jef_eval2;
+            set work._adsk_jef_eval;
+        run;
+    %end;
     proc sql;
         create table &_matched as
         select distinct _adsk_obs_id
-        from &_joined
-        %if %superq(_join_filter) ne %then %do;
-            where %unquote(&_join_filter)
+        from work._adsk_jef_eval2
+        %if %superq(_row_expr) ne %then %do;
+            where %unquote(&_row_expr)
         %end;
         ;
     quit;
-
     /* -----------------------------------------------------------------*/
     /* Create source used for final output.                             */
     /*                                                                  */          
@@ -845,7 +1050,7 @@ Latest update Date:         2026-10-18
     proc datasets library = work nolist nowarn ;
         delete _adsk_jef_src _adsk_jef_add _adsk_jef_srcf _adsk_jef_addf
                _adsk_jef_srcfinal  _adsk_jef_match  _adsk_jef_result
-               _adsk_jef_joined
+               _adsk_jef_joined _adsk_jef_window _adsk_jef_valid _adsk_jef_eval _adsk_jef_agg _adsk_jef_eval2
         ;
     quit;
     /* Completion message */
