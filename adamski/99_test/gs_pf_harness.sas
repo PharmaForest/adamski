@@ -6,7 +6,10 @@
   Author                      : Cursor
   Date                        : 31OCT2026
   Input Datasets or Metadata  : Work datasets built by each golden-subject script
-  Modification Log            :
+  Modification Log            : 15NOV2026 - gs_char skips STRIP when the
+                                obtained value is blank.
+                                15NOV2026 - Blank matches blank, and the
+                                text file prints the word blank.
 
   Include this after the macros under test.
   Each script sets gs_pass, gs_fail, and gs_policy to 0 before the first check.
@@ -167,7 +170,9 @@
 
 %macro gs_char(id, data, wh, var, expect);
   %local _n
-         _got;
+         _got
+         _cmp
+         _exp;
 
   %if %sysfunc(exist(&data)) = 0 %then %do;
       %gs_fail(&id, %str(not created), &expect);
@@ -176,6 +181,8 @@
 
   %let _n   = 0;
   %let _got = ;
+  %let _cmp = ;
+  %let _exp = ;
 
   proc sql noprint;
        reset exec;
@@ -187,16 +194,18 @@
        where &wh;
   quit;
 
-  %let _got = %sysfunc(strip(&_got));
+  /* A space and an empty value are both blank. STRIP has no argument when the value is empty. */
+  %if %length(%superq(_got)) > 0 %then %let _cmp = %sysfunc(strip(%superq(_got)));
+  %if %length(%superq(expect)) > 0 %then %let _exp = %sysfunc(strip(%superq(expect)));
 
   %if %sysevalf(&_n = 1, boolean) = 0 %then %do;
       %gs_fail(&id, &_n, %str(1));
   %end;
-  %else %if "&_got" ne "&expect" %then %do;
-      %gs_fail(&id, &_got, &expect);
+  %else %if "&_cmp" ne "&_exp" %then %do;
+      %gs_fail(&id, &_cmp, &_exp);
   %end;
   %else %do;
-      %gs_pass(&id, &_got, &expect);
+      %gs_pass(&id, &_cmp, &_exp);
   %end;
 %mend gs_char;
 
@@ -231,9 +240,15 @@
 
   data _null_;
        set gsout.&_mem;
+       length _txt_obt _txt_exp $80;
        file "&PFDIR/output/&_mem..txt";
        if _n_ = 1 then put "Test" @20 "Result" @30 "Obtained" @50 "Correct";
-       put test_id @20 result @30 obtained @50 expected;
+       /* The result dataset keeps the compared values. The text file names a missing value. */
+       _txt_obt = obtained;
+       _txt_exp = expected;
+       if missing(obtained) then _txt_obt = 'blank';
+       if missing(expected) then _txt_exp = 'blank';
+       put test_id @20 result @30 _txt_obt @50 _txt_exp;
   run;
 
   libname gsout clear;

@@ -6,7 +6,8 @@
   Author                      : Cursor
   Date                        : 03NOV2026
   Input Datasets or Metadata  : The gs_derive_param scripts in this folder
-  Modification Log            :
+  Modification Log            : 14NOV2026 - Add derive_var_trtemfl.
+                                09NOV2026 - Add derive_param_framingham.
 
   These checks use WORK data only. They do not call the ODA libname setup.
   PFDIR defaults to HOME/Adamski/SAS.
@@ -26,8 +27,10 @@
   POLICY is an accepted difference. It is not counted as a failure.
 
   WARNING lines from derive_param_bmi, derive_param_bsa, derive_param_map,
-  derive_param_wbc_abs, derive_param_rr, and derive_param_qtc are expected
-  when the golden-subject input is the bad-unit or bad-key case. A PASS
+  derive_param_wbc_abs, derive_param_rr, derive_param_qtc,
+  derive_param_framingham, and derive_var_trtemfl are expected
+  when the golden-subject input is the bad-unit, bad-key, or missing
+  ADSL-date case. A PASS
   on that check means the macro stopped and did not create the output.
   WARNING: [GOLDEN FAIL] means a check did not get the expected result.
   Those messages are not SAS errors. A log line that begins with ERROR
@@ -148,6 +151,24 @@ options errorcheck=normal nosyntaxcheck obs=max;
 %gs_add;
 %put NOTE: Finished derive_param_qtc pass=&gs_pass fail=&gs_fail policy=&gs_policy;
 
+%let gs_pass = 0;
+%let gs_fail = 0;
+%let gs_policy = 0;
+options errorcheck=normal nosyntaxcheck obs=max;
+%put NOTE: Starting derive_param_framingham;
+%include "&PFDIR/TestThat/gs_derive_param_framingham.sas";
+%gs_add;
+%put NOTE: Finished derive_param_framingham pass=&gs_pass fail=&gs_fail policy=&gs_policy;
+
+%let gs_pass = 0;
+%let gs_fail = 0;
+%let gs_policy = 0;
+options errorcheck=normal nosyntaxcheck obs=max;
+%put NOTE: Starting derive_var_trtemfl;
+%include "&PFDIR/TestThat/gs_derive_var_trtemfl.sas";
+%gs_add;
+%put NOTE: Finished derive_var_trtemfl pass=&gs_pass fail=&gs_fail policy=&gs_policy;
+
 
 libname gsval "&PFDIR/validation";
 
@@ -176,6 +197,19 @@ libname gsval "&PFDIR/validation";
 %gs_save(qtc_fri);
 %gs_save(qtc_sag);
 %gs_save(qtc_sec);
+%gs_save(fcvd_main);
+%gs_save(fcvd_gap);
+%gs_save(fcvd_mmol);
+%gs_save(fcvd_dup);
+%gs_save(fcvd_sex);
+%gs_save(fcvd_blank);
+%gs_save(fcvd_neg);
+%gs_save(fcvd_ok);
+%gs_save(fcvd_age);
+%gs_save(fcvd_tpt);
+%gs_save(te_in);
+%gs_save(te_impute);
+%gs_save(te_noadsl);
 
 libname gsval clear;
 
@@ -250,6 +284,73 @@ data work.gs_desc;
      test_id = 'GS-QTC-05';  description = 'QT in sec is not ms or msec, so the macro stops and writes no output.'; output;
      test_id = 'GS-QTC-05U'; description = 'The unit-failure flag is set when QT is in sec.'; output;
      test_id = 'GS-QTC-06';  description = 'Method Hodges is not accepted, so the macro stops and writes no output.'; output;
+     test_id = 'GS-FCVD-01';  description = 'Woman, untreated, from the admiral example. The 10-year risk is 3.13561405 percent.'; output;
+     test_id = 'GS-FCVD-02';  description = 'The same woman at the next visit, treated for hypertension. The risk is 5.80073036 percent.'; output;
+     test_id = 'GS-FCVD-03';  description = 'Man, smoker, diabetic, and treated. Units MMHG and MG/DL are accepted. The risk is 42.30739315 percent.'; output;
+     test_id = 'GS-FCVD-04';  description = 'The same man at the next visit. The risk is 37.46547303 percent.'; output;
+     test_id = 'GS-FCVD-05';  description = 'Untreated man from compute_framingham. Systolic coefficient 1.93303. The risk is 10.37513713 percent.'; output;
+     test_id = 'GS-FCVD-06';  description = 'The same man treated for hypertension. Systolic coefficient 1.99881. The risk is 14.02397752 percent.'; output;
+     test_id = 'GS-FCVD-07';  description = 'Woman, smoker, and treated. Lower case flags are accepted. The risk is 16.40353463 percent.'; output;
+     test_id = 'GS-FCVD-08';  description = 'Seven visits have all three tests, so seven score rows are added.'; output;
+     test_id = 'GS-FCVD-08U'; description = 'The unit check stays clear when pressure is mmHg and cholesterol is mg/dL.'; output;
+     test_id = 'GS-FCVD-09';  description = 'The source systolic value 121 is kept.'; output;
+     test_id = 'GS-FCVD-10';  description = 'The score parameter text is the Framingham 10-year risk score.'; output;
+     test_id = 'GS-FCVD-11';  description = 'The score row does not copy mmHg or mg/dL into AVALU.'; output;
+     test_id = 'GS-FCVD-12';  description = 'The visit that has all three tests is scored. The risk is 3.13561405 percent.'; output;
+     test_id = 'GS-FCVD-12N'; description = 'The visit with no HDL adds no score, so only one score row is added.'; output;
+     test_id = 'GS-FCVD-13';  description = 'Cholesterol in mmol/L is not mg/dL, so the macro stops and writes no output.'; output;
+     test_id = 'GS-FCVD-13U'; description = 'The unit-failure flag is set when cholesterol is mmol/L.'; output;
+     test_id = 'GS-FCVD-14';  description = 'Two systolic rows at the same key stop the macro and write no output.'; output;
+     test_id = 'GS-FCVD-15';  description = 'Sex U is not M or F, so the macro stops and writes no output.'; output;
+     test_id = 'GS-FCVD-16';  description = 'A blank HDL unit stops the macro and writes no output.'; output;
+     test_id = 'GS-FCVD-17';  description = 'A positive set of inputs is still scored when another subject has cholesterol of -1.'; output;
+     test_id = 'GS-FCVD-17N'; description = 'Cholesterol of -1 adds no score, so only one score row is added.'; output;
+     test_id = 'GS-FCVD-18';  description = 'Untreated diabetic man from compute_framingham. The risk is 17.66744232 percent.'; output;
+     test_id = 'GS-FCVD-19';  description = 'Untreated male smoker from compute_framingham. The risk is 19.00411502 percent.'; output;
+     test_id = 'GS-FCVD-20';  description = 'Untreated woman from compute_framingham. The risk is 6.18123965 percent.'; output;
+     test_id = 'GS-FCVD-21';  description = 'Treated woman from compute_framingham. Systolic coefficient 2.82263. The risk is 8.24132189 percent.'; output;
+     test_id = 'GS-FCVD-22';  description = 'Untreated diabetic woman from compute_framingham. The risk is 11.96236247 percent.'; output;
+     test_id = 'GS-FCVD-23';  description = 'Untreated female smoker from compute_framingham. The risk is 10.26087917 percent.'; output;
+     test_id = 'GS-FCVD-24';  description = 'Six complete visits add six score rows.'; output;
+     test_id = 'GS-FCVD-24C'; description = 'The carried STUDYID on the score row is ABC.'; output;
+     test_id = 'GS-FCVD-24P'; description = 'The caller parameter label replaces the default Framingham text.'; output;
+     test_id = 'GS-FCVD-25';  description = 'Ages that differ by less than the match tolerance are still scored. The risk is 3.13561405 percent.'; output;
+     test_id = 'GS-FCVD-26';  description = 'Time point T1 is scored on its own. The risk is 3.13561405 percent.'; output;
+     test_id = 'GS-FCVD-26B'; description = 'Time point T2 at the same visit is scored on its own. The risk is 5.80073036 percent.'; output;
+     test_id = 'GS-FCVD-26N'; description = 'Two time points at one visit add two score rows.'; output;
+     test_id = 'GS-TE-00';   description = 'AE rows with no ADSL treatment dates do not produce an output dataset.'; output;
+     test_id = 'GS-TE-N';    description = 'The merged input has 27 rows and the flag output keeps all 27.'; output;
+     test_id = 'GS-TE-01';   description = 'Onset at 08:00 is before the noon treatment datetime, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-01D';  description = 'TRTSDT and TRTEDT on the output are the ADSL values from the input.'; output;
+     test_id = 'GS-TE-02';   description = 'Onset has a date and no time on the treatment day, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-03';   description = 'Onset date is the calendar day before the treatment datetime, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-04';   description = 'Onset at 14:00 is after the noon treatment datetime, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-05';   description = 'Onset on TRTEDT plus 30 days is inside the window, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-06';   description = 'Onset the day after TRTEDT plus 30 days is outside the window, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-07';   description = 'The event ended before treatment and the onset is missing, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-08';   description = 'Onset is missing and xxDTC is missing, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-09';   description = 'Treatment start is missing on the row, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-10';   description = 'Month and year overlap the window and the numeric onset is missing, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-11';   description = 'The onset month ends before treatment, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-12';   description = 'The onset year is entirely after the window, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-13';   description = 'The onset year overlaps the window, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-14';   description = 'A full xxDTC date inside the window is used when ASTDT and ASTDTM are missing, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-15';   description = 'xxDTC time 08:00 is before the noon dose when numeric onset is missing, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-16';   description = 'TRTEDT is missing and onset is treatment start plus 30 days, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-16D';  description = 'A missing TRTEDT stays missing. The macro does not create a treatment end date.'; output;
+     test_id = 'GS-TE-17';   description = 'TRTEDT is missing and onset is one day after treatment start plus 30 days, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-18';   description = 'The imputed day is before treatment, but the month meets the window, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-19';   description = 'day_impute_teae=NO keeps the imputed day, so the same row has TRTEMFL blank.'; output;
+     test_id = 'GS-TE-19D';  description = 'The ADSL treatment dates on the day-imputation row are unchanged.'; output;
+     test_id = 'GS-TE-20A';  description = 'The pre-treatment grade 2 row is not treatment-emergent.'; output;
+     test_id = 'GS-TE-20B';  description = 'An in-window grade equal to the pre-treatment maximum is not treatment-emergent.'; output;
+     test_id = 'GS-TE-20C';  description = 'An in-window grade higher than the pre-treatment maximum is treatment-emergent.'; output;
+     test_id = 'GS-TE-21A';  description = 'The pre-treatment row with a missing grade is not treatment-emergent.'; output;
+     test_id = 'GS-TE-21B';  description = 'The later grade cannot be cleared when the pre-treatment grade is missing, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-22';   description = 'On 01JAN1960 the onset time 10:00 is after treatment at 08:00, so TRTEMFL is Y.'; output;
+     test_id = 'GS-TE-23';   description = 'On 01JAN1960 the onset time 07:00 is before treatment at 08:00, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-24';   description = 'A populated ASTDT before treatment is kept when xxDTC has a complete day, so TRTEMFL is blank.'; output;
+     test_id = 'GS-TE-25';   description = 'AEENDTC before treatment, with no numeric end, leaves TRTEMFL blank.'; output;
 run;
 
 proc sort data=work.gs_result
@@ -316,7 +417,7 @@ options errorcheck=normal nosyntaxcheck obs=max replace;
 
 data work.gs_overall;
      set work.gs_summary end=_last;
-     length parameter $8;
+     length parameter $16;
      retain _pass _fail _policy _n 0;
      parameter = upcase(substr(suite, 14));
      if parameter = 'WBC_ABS' then parameter = 'WBC';
