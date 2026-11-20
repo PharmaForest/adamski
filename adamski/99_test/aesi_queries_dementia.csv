@@ -1,0 +1,22 @@
+PREFIX,GRPNAME,GRPID,SCOPE,SCOPEN,SRCVAR,TERMCHAR,TERMNUM,COMMENT
+SMQ01,Dementia (AESI),20000073,BROAD,1,AEDECOD,Amnesia,,CDISC pilot Alzheimer AE. MedDRA Dementia SMQ 20000073 broad term
+SMQ01,Dementia (AESI),20000073,BROAD,1,AEDECOD,Agitation,,
+SMQ01,Dementia (AESI),20000073,BROAD,1,AEDECOD,Confusional state,,
+SMQ01,Dementia (AESI),20000073,BROAD,1,AEDECOD,Cognitive disorder,,
+SMQ01,Dementia (AESI),20000073,BROAD,1,AEDECOD,Disorientation,,
+SMQ01,Dementia (AESI),20000073,BROAD,1,AEDECOD,Delirium,,
+SMQ02,Convulsions (AESI),20000079,NARROW,2,AEDECOD,Complex partial seizures,,CDISC pilot Alzheimer AE. MedDRA Convulsions SMQ 20000079 narrow seizure terms
+SMQ02,Convulsions (AESI),20000079,NARROW,2,AEDECOD,Partial seizures with secondary generalisation,,
+SMQ03,Depression and suicide/self-injury (AESI),20000035,NARROW,2,AEDECOD,Completed suicide,,CDISC pilot Alzheimer AE. MedDRA SMQ 20000035
+SMQ03,Depression and suicide/self-injury (AESI),20000035,BROAD,1,AEDECOD,Depressed mood,,
+CQ01,Falls and injuries AESI,,,,AEDECOD,Fall,,Custom query for falls and injuries in a dementia population
+CQ01,Falls and injuries AESI,,,,AEDECOD,Hip fracture,,
+CQ01,Falls and injuries AESI,,,,AEDECOD,Contusion,,
+CQ01,Falls and injuries AESI,,,,AEDECOD,Facial bones fracture,,
+CQ01,Falls and injuries AESI,,,,AEDECOD,Skin laceration,,
+CQ02,Behavioral symptoms AESI,,,,AEDECOD,Hallucination,,Custom query for behavioral symptoms in a dementia population
+CQ02,Behavioral symptoms AESI,,,,AEDECOD,"Hallucination, visual",,
+CQ02,Behavioral symptoms AESI,,,,AEDECOD,Delusion,,
+CQ02,Behavioral symptoms AESI,,,,AEDECOD,Irritability,,
+CQ02,Behavioral symptoms AESI,,,,AEDECOD,Restlessness,,
+CQ02,Behavioral symptoms AESI,,,,AEDECOD,Psychomotor hyperactivity,,
