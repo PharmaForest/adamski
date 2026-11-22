@@ -1,370 +1,244 @@
+
 /*** HELP START ***/
 /*
-Macro:
+
+### Macro:
     %derive_var_joined_exist_flag
-Purpose:
-    Derives a flag variable for an observation based on whether another
+
+### Purpose:
+    Derive a record-level flag indicating whether at least one
     qualifying observation exists within the same BY group.
-    The macro compares observations from an input dataset with observations
-    from an additional dataset. The additional dataset may be the same as
-    the input dataset.
-    FILTER_ADD restricts additional observations before joining.
-    FILTER_JOIN evaluates the current and joined observations together
-    after joining, including variables referenced using the .join suffix.
-    The macro can search:
-        - observations before the current observation
-        - observations after the current observation
-        - all other observations within the same BY group
-    When the input dataset and additional dataset are the same dataset,
-    an observation is not allowed to match itself.
-    This macro is conceptually based on the functionality provided by
+
+    Each input observation is compared with observations from
+    the same dataset or a separate additional dataset.
+
+    Qualifying observations are identified using BEFORE,
+    AFTER, or ALL joins, together with optional filtering
+    and comparison conditions.
+
+    The derived flag is assigned to individual input records,
+    unlike group-level SQL aggregate helper macros.
+
+    The functionality is conceptually based on the R function
     admiral::derive_var_joined_exist_flag().
-Parameters:
-    - `dataset` (required) :
-        Input dataset containing the observations for which the flag
-        is to be derived.
-    - `dataset_add` (optional) :
-        Dataset containing observations to be searched for a qualifying
-        record.
-        If not specified, `dataset` is used.
-    - `by_vars` (required) :
-        Space-separated list of variables used to match observations
-        between `dataset` and `dataset_add`.
-        Variables must exist in both datasets and must have the same
-        variable type.
-        Example:
-            by_vars = USUBJID PARAMCD
-        generates matching conditions equivalent to:
-            a.USUBJID = b.USUBJID
-            and
-            a.PARAMCD = b.PARAMCD
-    - `order` (optional) :
-        Space-separated list of variables used to determine whether an
-        observation occurs before or after the current observation.
-        Required when:
-            join_type = before
-            join_type = after
-        Variables must exist in both datasets and must have the same
-        variable type.
-        Example:
-            order = AVISITN
-        Multiple ordering variables are supported.
-        Example:
-            order = ADT ATM
-        Multiple variables are compared lexicographically.
-        For:
-            order = ADT ATM
-        an observation is considered after another observation when:
-            b.ADT > a.ADT
-        or:
-            b.ADT = a.ADT and b.ATM > a.ATM
-    - `new_var` (required) :
-        Name of the flag variable to be created.
-        Example:
-            new_var = CONFFL
-        If the variable already exists in the input dataset, it is
-        overwritten with a warning.
-    - `join_type` (optional) :
-        Specifies which observations from `dataset_add` are considered.
-        Permitted values:
-            before
-            after
-            all
-        Default:
-            all
-        `before`:
-            Only observations ordered before the current observation
-            are considered.
-        `after`:
-            Only observations ordered after the current observation
-            are considered.
-        `all`:
-            All other observations in the same BY group are considered.
-    - `filter_join` (optional) :
-        SAS SQL condition evaluated on each current/joined observation pair.
-        Current-record variables use their ordinary names; joined-record
-        variables listed in JOIN_VARS use the .join suffix.
-        Example:
-            filter_join = ADURN > 30 and ACOVFL.join = "Y"
-                          and ADY.join <= ADY + 7
-    - `join_vars` (optional) :
-        Space-separated list of variables from DATASET_ADD that FILTER_JOIN
-        references using the .join suffix. These variables must exist in
-        DATASET_ADD. Example:
-            join_vars = ACOVFL ADY
-    - `first_cond_lower` / `first_cond_upper` (optional) :
-        SAS condition defining the nearest inclusive boundary for BEFORE/AFTER joins.
-        References to JOIN_VARS use the .join suffix.
-    - `filter_add` (optional) :
-        SAS SQL condition applied to observations from `dataset_add`
-        before the join is performed.
-        Variable names should be specified normally without table aliases.
-        Example:
-            filter_add = AVALC = "Y" and ANL01FL = "Y"
-    - `true_value` (optional) :
-        Value assigned to `new_var` when at least one qualifying joined
-        observation exists.
-        Character values should be supplied without quotation marks.
-        Default:
-            Y
-    - `false_value` (optional) :
-        Value assigned to `new_var` when no qualifying joined observation
-        exists.
-        Character values should be supplied without quotation marks.
-        Default:
-            Missing
-    - `value_type` (optional) :
-        Type of the derived flag variable.
-        Permitted values:
-            C = Character
-            N = Numeric
-        Default:
-            C
-    - `new_var_length` (optional) :
-        Length of a character flag variable.
-        Default:
-            1
-        Ignored when `value_type = N`.
-    - `outdata` (optional) :
-        Output dataset.
-        If not specified, the input dataset is overwritten.
-R alignment:
-    - The following Admiral R parameters are not implemented:
-        tmp_obs_nr_var, check_type.
-    - tmp_obs_nr_var: R supports order-based temporary observation numbers
-      for conditions; SAS currently creates internal row identifiers only.
-    - join_vars: Joined-record variables can be referenced with the .join
-      suffix in FILTER_JOIN, as in Admiral R. This SAS macro translates
-      those references to temporary SAS variable names.
-    - first_cond_lower / first_cond_upper: Restrict BEFORE/AFTER joins to
-      the nearest qualifying boundary (inclusive).
-    - check_type: R controls duplicate BY/ORDER diagnostics; configurable
-      duplicate checks are not implemented in this SAS macro.
-    - filter_add filters DATASET_ADD before joining; filter_join evaluates
-      the current and joined records together. R-specific grouped summary
-      functions other than a single ALL(expression) are not implemented.
-    - value_type (SAS-specific parameter): This parameter was introduced 
-      in the SAS implementation to explicitly control whether the derived 
-      flag variable is character (C) or numeric (N). Unlike R, where the 
-      output variable type can be inferred from the supplied values, SAS 
-      requires the variable type to be established during DATA step 
-      compilation. The parameter ensures that true_value and false_value 
-      are assigned using the intended SAS variable type, avoiding 
-      unintended type conversion or mismatches. This is an 
-      implementation-specific addition and does not change the derivation 
-      logic or intended alignment with the R function.
-    - new_var_length: Sets the SAS character flag length.
-    - outdata: Allows the output to be written to a separate SAS dataset.
-Notes:
-    - FILTER_ADD is applied before joining; FILTER_JOIN is evaluated
-      after the join, against each current/joined observation pair.
-    - `by_vars` are used only to determine which observations belong to
-      the same group.
-    - `filter_join` can reference current observations and JOIN_VARS from
-      `dataset_add` using the .join suffix.
-    - `filter_add` applies only to observations from `dataset_add`.
-    - `join_type=before` and `join_type=after` require `order`.
-    - When `dataset_add` is the same dataset as `dataset`, the current
-      physical observation cannot match itself.
-    - One-level dataset names are treated as WORK datasets when determining
-      whether `dataset` and `dataset_add` refer to the same dataset.
-        Example:
-            ADRS
-        and:
-            WORK.ADRS
-        are treated as the same dataset.
-    - Other observations having identical BY and ORDER values may still
-      qualify because they are physically separate observations.
-    - The macro retains only the observation numbers of input records for
-      which at least one qualifying joined observation exists.
-    - The potentially expanded joined dataset is not returned.
-    - For `join_type=all`, all other observations from the matching BY
-      group are considered.
-    - BY and ORDER variables must have matching character/numeric types
-      between `dataset` and `dataset_add`.
-    - If `new_var` already exists, it is overwritten in the output dataset.
-    - Macro quoting may be required when `filter_join` or `filter_add`
-      contains commas.
-    - JOIN_VARS must be simple SAS variable names of at most 27 characters
-      so the temporary _join suffix fits the SAS 32-character name limit.
-    - Do not use input variable names ending in _join for JOIN_VARS, or
-      reference joined variables without the .join suffix.
-Sample code:
+
+### Parameters:
+
+ - 'dataset' (required) : input dataset containing records to be flagged
+ - 'dataset_add' (optional, default=dataset) : additional dataset used for joining
+ - 'by_vars' (required) : grouping variables used to match observations
+ - 'order' (required for BEFORE/AFTER) : variables defining observation order
+ - 'new_var' (required) : name of the derived flag variable
+ - 'join_type' (optional, default=all) : BEFORE | AFTER | ALL
+ - 'join_vars' (optional) : joined variables referenced using the .join suffix
+ - 'filter_add' (optional) : condition applied to additional records before joining
+ - 'filter_join' (optional) : condition applied to joined observation pairs
+ - 'first_cond_lower' (optional) : lower boundary condition for ordered joins
+ - 'first_cond_upper' (optional) : upper boundary condition for ordered joins
+ - 'true_value' (optional, default=Y) : value assigned when a match exists
+ - 'false_value' (optional) : value assigned when no match exists
+ - 'value_type' (optional, default=C) : C for character or N for numeric
+ - 'new_var_length' (optional, default=1) : character flag length
+ - 'outdata' (optional) : output dataset name
+
+### Macros Called:
+
+ - %all
+ - %any
+ - %count_vals
+ - %min_cond
+ - %max_cond
+
+
+### Sample code:
+
 ~~~sas
-* Test 1: AFTER + self join + character flag ;
+
+**Example1: flag records with a later qualifying observation;
+
 data adrs;
-    length USUBJID $3 PARAMCD $8 AVALC $2 ANL01FL $1;
-    input
-        USUBJID $
-        PARAMCD $
-        AVISITN
-        AVALC $
-        ANL01FL $
-    ;
-    datalines;
-01 RESP 1 Y Y
-01 RESP 2 N Y
-01 RESP 3 Y Y
-01 RESP 4 N Y
-02 RESP 1 Y Y
-02 RESP 2 N Y
-03 RESP 1 Y N
-03 RESP 2 Y Y
+    length USUBJID $10 PARAMCD $8 AVALC $2 ANL01FL $1;
+    input USUBJID $ PARAMCD $ AVISITN AVALC $ ANL01FL $;
+datalines;
+101 FIE 1 N Y
+101 FIE 2 Y Y
+101 FIE 3 N Y
+102 FIE 1 N Y
+102 FIE 2 N Y
+103 FIE 1 N Y
+103 FIE 2 Y N
 ;
 run;
+
 %derive_var_joined_exist_flag(
-    dataset      = adrs,
-    by_vars      = USUBJID PARAMCD,
-    order        = AVISITN,
-    new_var      = CONFFL,
-    join_type    = after,
-    filter_join = AVALC = "Y" and ANL01FL = "Y",
-    filter_add  = AVALC = "Y" and ANL01FL = "Y",
-    true_value   = Y,
-    false_value  = ,
-    outdata      = adrs_out
-);
-* Test 2: BEFORE + self join + numeric flag ;
-data adex;
-    length USUBJID $3 ANL01FL $1;
-    input
-        USUBJID $
-        AVISITN
-        EXDOSE
-        ANL01FL $
-    ;
-    datalines;
-01 1 10 Y
-01 2 20 Y
-01 3 30 Y
-02 1 15 Y
-02 2 25 N
-03 1 40 Y
-;
-run;
-%derive_var_joined_exist_flag(
-    dataset      = adex,
-    by_vars      = USUBJID,
-    order        = AVISITN,
-    new_var      = PREVFL,
-    join_type    = before,
-    filter_join = ANL01FL = "Y",
-    filter_add    = ANL01FL = "Y",
-    true_value   = 1,
-    false_value  = 0,
-    value_type   = N,
-    outdata      = adex_out
-);
-* Test 3: ALL + separate dataset + multiple BY variables ;
-data adrs_base;
-    length USUBJID $3 PARAMCD $8 AVALC $2;
-    input
-        USUBJID $
-        PARAMCD $
-        AVISITN
-        AVALC $
-    ;
-    datalines;
-01 RESP 1 PR
-01 RESP 2 CR
-02 RESP 1 PR
-02 RESP 2 SD
-03 RESP 1 CR
-;
-run;
-data confirm;
-    length USUBJID $3 PARAMCD $8 CONFVAL $2;
-    input
-        USUBJID $
-        PARAMCD $
-        CONFVIS
-        CONFVAL $
-    ;
-    datalines;
-01 RESP 3 CR
-01 RESP 4 CR
-02 RESP 3 PR
-04 RESP 2 CR
-;
-run;
-%derive_var_joined_exist_flag(
-    dataset      = adrs_base,
-    dataset_add  = confirm,
-    by_vars      = USUBJID PARAMCD,
-    new_var      = EXTCONFL,
-    join_type    = all,
-    filter_join = AVALC = "CR",
-    filter_add    = CONFVAL = "CR",
-    true_value   = Y,
-    false_value  = ,
-    outdata      = adrs_confirm
-);
-* Test 4: Multiple ORDER variables ;
-data adtest;
-    length USUBJID $3 ANL01FL $1;
-    input
-        USUBJID $
-        ADT :date9.
-        ATM :time5.
-        ANL01FL $
-    ;
-    format
-        ADT date9.
-        ATM time5.
-    ;
-    datalines;
-01 01JAN2025 08:00 Y
-01 01JAN2025 10:00 Y
-01 02JAN2025 07:00 Y
-02 01JAN2025 09:00 Y
-;
-run;
-%derive_var_joined_exist_flag(
-    dataset      = adtest,
-    by_vars      = USUBJID,
-    order        = ADT ATM,
-    new_var      = NEXTFL,
-    join_type    = after,
-    filter_join = ANL01FL = "Y",
-    filter_add    = ANL01FL = "Y",
-    true_value   = Y,
-    false_value  = ,
-    outdata      = adtest_out
-);
-* Test 5: ALL self join - current observation must not match itself ;
-data selftest;
-    length USUBJID $3 AVALC $2;
-    input
-        USUBJID $
-        AVISITN
-        AVALC $
-    ;
-    datalines;
-01 1 CR
-02 1 CR
-02 2 CR
-;
-run;
-%derive_var_joined_exist_flag(
-    dataset      = selftest,
-    by_vars      = USUBJID,
-    new_var      = CONFFL,
-    join_type    = all,
-    filter_join = AVALC = "CR",
-    filter_add    = AVALC = "CR",
-    true_value   = Y,
-    false_value  = ,
-    outdata      = selftest_out
+    dataset=adrs,
+    by_vars=USUBJID PARAMCD,
+    order=AVISITN,
+    new_var=CONFFL,
+    join_type=after,
+    filter_add=AVALC = "Y" and ANL01FL = "Y",
+    true_value=Y,
+    false_value=,
+    outdata=adrs_out
 );
 
-URL:
+
+**Example2: flag records with an earlier qualifying observation;
+
+data adex;
+    length USUBJID $10 ANL01FL $1;
+    input USUBJID $ AVISITN ANL01FL $;
+datalines;
+101 1 Y
+101 2 N
+101 3 N
+102 1 N
+102 2 Y
+102 3 N
+103 1 N
+103 2 N
+;
+run;
+
+%derive_var_joined_exist_flag(
+    dataset=adex,
+    by_vars=USUBJID,
+    order=AVISITN,
+    new_var=PREVFL,
+    join_type=before,
+    filter_add=ANL01FL = "Y",
+    true_value=1,
+    false_value=0,
+    value_type=N,
+    outdata=adex_out
+);
+
+
+**Example3: flag records using a separate additional dataset;
+
+data adrs_base;
+    length USUBJID $10 PARAMCD $8 AVALC $2;
+    input USUBJID $ PARAMCD $ AVISITN AVALC $;
+datalines;
+101 FIE 1 PR
+102 FIE 1 SD
+103 FIE 1 PR
+104 FIE 1 SD
+;
+run;
+
+data confirm;
+    length USUBJID $10 PARAMCD $8 CONFVAL $2;
+    input USUBJID $ PARAMCD $ CONFVAL $;
+datalines;
+101 FIE CR
+102 FIE SD
+103 FIE CR
+;
+run;
+
+%derive_var_joined_exist_flag(
+    dataset=adrs_base,
+    dataset_add=confirm,
+    by_vars=USUBJID PARAMCD,
+    new_var=EXTCONFL,
+    join_type=all,
+    filter_add=CONFVAL = "CR",
+    true_value=Y,
+    false_value=,
+    outdata=adrs_confirm
+);
+
+
+**Example4: flag records using multiple ORDER variables;
+
+data adrs_time;
+    length USUBJID $10 PARAMCD $8 AVALC $2;
+    informat ADT yymmdd10.;
+    format ADT yymmdd10.;
+    input USUBJID $ PARAMCD $ ADT :yymmdd10. ATM AVALC $;
+datalines;
+101 FIE 2026-01-01 900 PR
+101 FIE 2026-01-01 1400 CR
+101 FIE 2026-01-02 900 SD
+102 FIE 2026-01-01 900 SD
+102 FIE 2026-01-02 900 PR
+;
+run;
+
+%derive_var_joined_exist_flag(
+    dataset=adrs_time,
+    by_vars=USUBJID PARAMCD,
+    order=ADT ATM,
+    new_var=LATERCRFL,
+    join_type=after,
+    filter_add=AVALC = "CR",
+    true_value=Y,
+    false_value=,
+    outdata=adrs_time_out
+);
+
+
+**Example5: exclude the current observation from a self-join;
+
+data adrs_self;
+    length USUBJID $10 PARAMCD $8 AVALC $2;
+    input USUBJID $ PARAMCD $ AVISITN AVALC $;
+datalines;
+101 FIE 1 CR
+101 FIE 2 PR
+102 FIE 1 CR
+103 FIE 1 SD
+103 FIE 2 PR
+;
+run;
+
+%derive_var_joined_exist_flag(
+    dataset=adrs_self,
+    by_vars=USUBJID PARAMCD,
+    new_var=OTHERCRFL,
+    join_type=all,
+    filter_add=AVALC = "CR",
+    true_value=Y,
+    false_value=,
+    outdata=adrs_self_out
+);
+
+~~~
+
+
+### Notes:
+
+ - This is a record-level flag derivation macro.
+ - Supports self-joins and joins to a separate dataset.
+ - Self-joins exclude matching the same physical observation.
+ - BEFORE and AFTER require ORDER variables.
+ - Multiple ORDER variables are compared lexicographically.
+ - FILTER_ADD selects candidate observations before joining.
+ - FILTER_JOIN evaluates conditions after joining.
+ - Joined variables using the .join suffix must be
+   declared through JOIN_VARS.
+ - The five helper macros listed above must be available
+   before execution.
+ - Existing NEW_VAR values may be overwritten.
+ - SAS missing-value behavior may differ from R.
+ - Exact parity with the corresponding R function
+   is not guaranteed.
+
+### URL:
+
 https://github.com/PharmaForest/adamski
+
 ---
-Author:                     Manivannan Mathialagan
-Latest update Date:         2026-10-18
+
+Author:                 Manivannan Mathialagan
+Latest update Date:     2026-11-22
+
 ---
+
 */
 /*** HELP END ***/
+
 %macro derive_var_joined_exist_flag(
     dataset          = ,
     dataset_add      = ,
@@ -383,7 +257,14 @@ Latest update Date:         2026-10-18
     new_var_length   = 1,
     outdata          =
 );
-%local _error _dsid_a _dsid_b _rc _join_type _value_type _nby _norder _i _j _var _varnum_a _varnum_b _vartype_a _vartype_b _by_condition _order_condition _prefix_equal _src _add _src_filtered _add_filtered _src_final _matched _result _new_var_num _lib_a _lib_b _mem_a _mem_b _same_dataset _njoin _join_var _join_filter _join_select _joined _join_name _join_num _src_join_num _boundary_cond _boundary_select _sort_order _all_expr _row_expr _has_all _has_boundary _boundary_mode _all_start _all_end _depth _pos _flen _chr _prefix _suffix _all_text _agg_n _agg_select _agg_columns _parse_error _check_type;
+%local _error _dsid_a _dsid_b _rc _join_type _value_type _nby _norder _i _j _var _varnum_a _varnum_b _vartype_a _vartype_b _by_condition _order_condition _prefix_equal _src _add _src_filtered _add_filtered _src_final _matched _result _new_var_num _lib_a _lib_b _mem_a _mem_b _same_dataset _njoin _join_var _join_filter _join_select _joined _join_name _join_num _src_join_num _boundary_cond _boundary_select _sort_order _all_expr _row_expr _has_all _has_boundary _boundary_mode _all_start _all_end _depth _pos _flen _chr _prefix _suffix _all_text _agg_n _agg_select _agg_columns _parse_error _check_type _adsk_function;
+    /* Shared utility dependencies must be loaded via AUTOCALL or %INCLUDE. */
+    %if not %sysmacexist(all) or not %sysmacexist(any) or
+        not %sysmacexist(count_vals) or not %sysmacexist(min_cond) or
+        not %sysmacexist(max_cond) %then %do;
+        %put ERROR: derive_var_joined_exist_flag: Load all five grouped utility macros first.;
+        %return;
+    %end;
     %let _error = 0;
     /* Temporary dataset names */
     %let _src = work._adsk_jef_src;
@@ -792,7 +673,7 @@ Latest update Date:         2026-10-18
     %let _parse_error = 0;
     %let _row_expr = %superq(_join_filter);
     data _null_;
-        length src rewritten func args part var cond val expression selection prefix suffix $32767;
+        length src rewritten func args part var cond val selection prefix suffix $32767;
         length ch quote $1;
         src = symget('_join_filter');
         n = 0;
@@ -831,12 +712,11 @@ Latest update Date:         2026-10-18
                 args = strip(substr(src,openpos+1,finish-openpos-1));
                 n + 1;
                 var = ''; cond = ''; val = '';
-                if func in ('all','any') then do;
-                    if func = 'all' then expression = cats('min(case when (',args,') then 1 else 0 end)');
-                    else expression = cats('max(case when (',args,') then 1 else 0 end)');
-                end;
+                /* Parser only extracts arguments. The five reusable macros
+                   own all SQL aggregate expression generation. */
+                if func in ('all','any') then cond = args;
                 else do;
-                    /* Named arguments are split at top-level commas only. */
+                    /* Named arguments split at top-level commas. */
                     depth = 0; quote = ' '; piece_start = 1;
                     do i = 1 to lengthn(args)+1;
                         if i > lengthn(args) then ch = ',';
@@ -859,16 +739,17 @@ Latest update Date:         2026-10-18
                             piece_start = i + 1;
                         end;
                     end;
-                    if missing(var) or (func = 'count_vals' and missing(val)) or (func ne 'count_vals' and missing(cond)) then do;
+                    if missing(var) or (func = 'count_vals' and missing(val))
+                       or (func ne 'count_vals' and missing(cond)) then do;
                         put 'ERROR: [derive_var_joined_exist_flag] Missing named argument for ' func;
                         call symputx('_parse_error',1,'L');
                         stop;
                     end;
-                    if func = 'count_vals' then expression = cats('sum(case when (',var,' = ',val,') then 1 else 0 end)');
-                    else if func = 'min_cond' then expression = catx(' ',cats('min(case when (',cond,')'),'then',var,'else . end)');
-                    else expression = catx(' ',cats('max(case when (',cond,')'),'then',var,'else . end)');
                 end;
-                call symputx(cats('_adsk_ag_expr',n),expression,'L');
+                call symputx(cats('_adsk_ag_func',n),func,'L');
+                call symputx(cats('_adsk_ag_var',n),var,'L');
+                call symputx(cats('_adsk_ag_cond',n),cond,'L');
+                call symputx(cats('_adsk_ag_val',n),val,'L');
                 prefix = ''; suffix = '';
                 if start > 1 then prefix = substr(src,1,start-1);
                 if finish < lengthn(src) then suffix = substr(src,finish+1);
@@ -894,7 +775,25 @@ Latest update Date:         2026-10-18
         call symputx('_agg_n',n,'L');
     run;
     %if &_parse_error %then %return;
+    /* Dispatch to independently reusable SQL utilities. The parser does
+       not implement or translate the five aggregate operations. */
     %do _i = 1 %to &_agg_n;
+        %let _adsk_function = &&_adsk_ag_func&_i;
+        %if &_adsk_function = all %then %do;
+            %let _adsk_ag_expr&_i = %all(cond=%superq(_adsk_ag_cond&_i));
+        %end;
+        %else %if &_adsk_function = any %then %do;
+            %let _adsk_ag_expr&_i = %any(cond=%superq(_adsk_ag_cond&_i));
+        %end;
+        %else %if &_adsk_function = count_vals %then %do;
+            %let _adsk_ag_expr&_i = %count_vals(var=%superq(_adsk_ag_var&_i),val=%superq(_adsk_ag_val&_i));
+        %end;
+        %else %if &_adsk_function = min_cond %then %do;
+            %let _adsk_ag_expr&_i = %min_cond(var=%superq(_adsk_ag_var&_i),cond=%superq(_adsk_ag_cond&_i));
+        %end;
+        %else %if &_adsk_function = max_cond %then %do;
+            %let _adsk_ag_expr&_i = %max_cond(var=%superq(_adsk_ag_var&_i),cond=%superq(_adsk_ag_cond&_i));
+        %end;
         %let _agg_select = &_agg_select, &&_adsk_ag_expr&_i as _adsk_ag&_i;
         %let _agg_columns = &_agg_columns, b._adsk_ag&_i;
     %end;
@@ -952,7 +851,7 @@ Latest update Date:         2026-10-18
     %if &_agg_n > 0 %then %do;
         proc sql;
             create table work._adsk_jef_agg as
-            select _adsk_obs_id &_agg_select
+            select _adsk_obs_id %unquote(%superq(_agg_select))
             from work._adsk_jef_eval
             group by _adsk_obs_id;
             create table work._adsk_jef_eval2 as
