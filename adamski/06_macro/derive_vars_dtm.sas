@@ -1,80 +1,236 @@
 /*** HELP START ***//*
+
 ### Macro:
     %derive_vars_dtm
 
 ### Purpose:
-    Derive numeric SAS datetime *DTM from ISO 8601 character --DTC, with optional
-    date/time imputation flags *DTF and *TMF. Standalone dataset-in/dataset-out
-    macro for ADAMSKI. This is a SAS implementation requiring QC against Admiral.
+    Derives a numeric SAS datetime from a character ISO 8601 date or datetime,
+    optionally imputing missing components and deriving imputation flags.
 
 ### Parameters:
-- dataset (required): Input SAS dataset.
-- new_vars_prefix (required): E.g. AST -> ASTDTM, ASTDTF, ASTTMF.
-- dtc (required): Character ISO 8601 date/datetime variable.
-- highest_imputation: n, s, m, h, D, M, Y (default h; case-sensitive for m/M).
-- date_imputation: first, mid, last, or MM-DD (default first).
-- time_imputation: first, last, or HH:MM:SS (default first).
-- flag_imputation: auto, both, date, time, none (default auto).
-- min_dates, min_dates_strict, max_dates, max_dates_strict:
-    Space-separated lists of numeric SAS date/datetime variables. Date-only
-    minimum boundaries use 00:00:00, maximum boundaries use 23:59:59.
-    Strict boundaries narrow the eligible interval for ordinary boundaries.
-- preserve: Y/N (default N). Preserve known lower components below a missing
-    higher component when Y; otherwise propagate missing components downward.
-- ignore_seconds_flag: Y/N (default Y). If Y, seconds must not be present in
-    any nonblank DTC input; S-only TMF is suppressed.
-- outdata: Output dataset (default: dataset, overwritten).
 
-### Notes:
-- Invalid/unsupported row-level DTC values result in missing *DTM and a log warning.
-- Invalid macro parameters, missing dataset/variables, and wrong variable types
-  stop macro execution before output creation using %RETURN.
-- All macro parameter values are displayed in the SAS log at invocation.
-- Existing *DTF is retained, as in Admiral. Existing *DTM/*TMF are overwritten.
-- Date/time components are parsed without timezone conversion. ISO timezone
-  offsets, fractional seconds, and nonstandard compact ISO strings are not supported.
-- When year is missing, highest_imputation=Y can use an applicable minimum
-  (date_imputation=first) or maximum (date_imputation=last) boundary.
-- Strict bounds restrict eligibility of other bounds; they do not unconditionally
-  force the final datetime to be within the strict range.
-- To avoid changing known DTC components, boundaries are considered only within
-  the possible datetime range represented by the original DTC.
-- If bounds conflict, the later-applied maximum bound takes precedence.
-- Compare expected outputs with Admiral before production use.
+- `dataset` (required) : Input SAS dataset.
+- `new_vars_prefix` (required) : Prefix for derived DTM, DTF and TMF variables.
+- `dtc` (required) : Character source date or datetime variable.
+- `highest_imputation` (optional) : Maximum permitted missing component.
+    Values: `n` (none), `s` (second), `m` (minute), `h` (hour),
+    `D` (day), `M` (month), `Y` (year). Case sensitive. Default: `h`.
+- `date_imputation` (optional) : Date replacement rule. Current implementation
+    accepts `first`, `mid`, `last` and `MM-DD`. Default: `first`.
+    Admiral additionally supports `DD` for day-level imputation and restricts
+    `MM-DD` to month-level imputation; alignment is pending.
+- `time_imputation` (optional) : Time replacement rule: `first`, `last`,
+    or `HH:MM:SS`. Default: `first`.
+- `flag_imputation` (optional) : Controls creation of flags. `date` creates DTF,
+    `time` creates TMF, `both` creates both, `none` creates neither.
+    `auto` creates DTF for D/M/Y and TMF for any level except n. Default: `auto`.
+- `min_dates` (optional) : Space-separated numeric date/datetime boundary
+    variables. Date values are converted to midnight. Default: blank.
+- `min_dates_strict` (optional) : SAS extension; lower eligibility boundaries.
+    Default: blank.
+- `max_dates` (optional) : Space-separated numeric date/datetime boundary
+    variables. Date values are converted to end of day. Default: blank.
+- `max_dates_strict` (optional) : SAS extension; upper eligibility boundaries.
+    Default: blank.
+- `preserve` (optional) : `Y` retains known lower components when a higher
+    component is absent; `N` discards them. Default: `N`.
+- `ignore_seconds_flag` (optional) : `Y` suppresses seconds-only TMF and
+    rejects collected seconds when highest_imputation is not `n`.
+    With highest_imputation=`n`, valid collected seconds are retained.
+    `N` permits collected seconds and seconds-only flags. Default: `Y`.
+- `outdata` (optional) : SAS extension; output dataset. Default: input dataset.
 
-### Sample code:
+### Sample code
+
 ~~~sas
+* Example 1: Default time imputation;
+data mhdt;
+    length MHSTDTC $40;
+    infile datalines dlm="|" dsd truncover;
+    input MHSTDTC :$40.;
+    datalines;
+"2019-07-18T15:25"
+"2019-07-18"
+"2019-02"
+"2019"
+"2019---07"
+""
+;
+run;
 %derive_vars_dtm(
-  dataset=ae, outdata=adae, new_vars_prefix=AST, dtc=AESTDTC,
-  highest_imputation=M, date_imputation=first, time_imputation=first,
-  min_dates=TRTSDTM, flag_imputation=auto
+    dataset=mhdt,
+    outdata=mhdt_ex1,
+    new_vars_prefix=AST,
+    dtc=MHSTDTC
+);
+
+* Example 2: End-of-period imputation;
+data mhdt;
+    length MHSTDTC $40;
+    infile datalines dlm="|" dsd truncover;
+    input MHSTDTC :$40.;
+    datalines;
+"2019-07-18T15:25"
+"2019-07-18"
+"2019-02"
+"2019"
+"2019---07"
+""
+;
+run;
+%derive_vars_dtm(
+    dataset=mhdt,
+    outdata=mhdt_ex2,
+    new_vars_prefix=AST,
+    dtc=MHSTDTC,
+    highest_imputation=M,
+    date_imputation=last,
+    time_imputation=last
+);
+
+* Example 3: No new imputation flags;
+data mhdt;
+    length MHSTDTC $40;
+    infile datalines dlm="|" dsd truncover;
+    input MHSTDTC :$40.;
+    datalines;
+"2019-07-18T15:25"
+"2019-07-18"
+"2019-02"
+"2019"
+"2019---07"
+""
+;
+run;
+%derive_vars_dtm(
+    dataset=mhdt,
+    outdata=mhdt_ex3,
+    new_vars_prefix=AST,
+    dtc=MHSTDTC,
+    flag_imputation=none
+);
+
+* Example 4: Apply upper date boundaries;
+data adae;
+    length AEENDTC $40;
+    infile datalines dlm='|' dsd truncover;
+    input AEENDTC :$40. DTHDT :yymmdd10. DCUTDT :yymmdd10.;
+    format DTHDT DCUTDT date9.;
+    datalines;
+2020-12|2020-12-26|2020-12-24
+2020-11|2020-12-06|2020-12-24
+|2020-12-06|2020-12-24
+2020-12-20|2020-12-06|2020-12-24
+;
+run;
+
+%derive_vars_dtm(
+    dataset=adae,
+    outdata=adae_ex4,
+    new_vars_prefix=AEN,
+    dtc=AEENDTC,
+    highest_imputation=Y,
+    date_imputation=last,
+    time_imputation=last,
+    max_dates=DTHDT DCUTDT
+);
+
+* Example 5: Include seconds-only flags;
+data mhdt;
+    length MHSTDTC $40;
+    infile datalines dlm="|" dsd truncover;
+    input MHSTDTC :$40.;
+    datalines;
+"2019-07-18T15:25"
+"2019-07-18"
+"2019-02"
+"2019"
+"2019---07"
+""
+;
+run;
+%derive_vars_dtm(
+    dataset=mhdt,
+    outdata=mhdt_ex5,
+    new_vars_prefix=AST,
+    dtc=MHSTDTC,
+    highest_imputation=M,
+    ignore_seconds_flag=N
+);
+
+* Example 6: Retain known lower components;
+data mhdt;
+    length MHSTDTC $40;
+    infile datalines dlm="|" dsd truncover;
+    input MHSTDTC :$40.;
+    datalines;
+"2019-07-18T15:25"
+"2019---18T15:-:05"
+"2019-07-18"
+"2019-02"
+"2019"
+"2019---07"
+""
+;
+run;
+%derive_vars_dtm(
+    dataset=mhdt,
+    outdata=mhdt_ex6,
+    new_vars_prefix=AST,
+    dtc=MHSTDTC,
+    highest_imputation=M,
+    date_imputation=mid,
+    time_imputation=last,
+    preserve=Y,
+    ignore_seconds_flag=N
 );
 ~~~
+
+### Note:
+
+- `outdata`, `min_dates_strict` and `max_dates_strict` are SAS extensions,
+    not arguments of Admiral 1.5.0 derive_vars_dtm.
+- SAS uses Y/N instead of R logical values, and variable lists instead of
+    R expressions for boundary arguments.
+- Use recognized SAS date/datetime formats on numeric boundary variables.
+- Existing DTF is retained; DTM and requested TMF are overwritten.
+- Invalid parameters stop execution. Unsupported input rows produce missing
+    results and diagnostics. Invalid imputed datetime handling differs from R.
+- Timezone offsets and fractional seconds are not supported by this macro.
+- Strict bounds narrow eligibility for boundary selection. If selected bounds
+    conflict, the maximum bound is applied last in the current implementation.
+- Missing-source year imputation and partial time parsing in Examples 4 and 6
+    are known validation issues. Parameter and behavior alignment is pending;
+    verify against Admiral before production use.
+
 ### URL:
+
 https://github.com/PharmaForest/adamski
 
----
-Author: Manivannan Mathialagan
-Latest update Date: 2026-10-18
----
+
+Author:                 Manivannan Mathialagan
+Latest update Date:     2026-11-24
+
 *//*** HELP END ***/
 
 %macro derive_vars_dtm(
-    dataset=,
-    new_vars_prefix=,
-    dtc=,
-    highest_imputation=h,
-    date_imputation=first,
-    time_imputation=first,
-    flag_imputation=auto,
-    min_dates=,
-    min_dates_strict=,
-    max_dates=,
-    max_dates_strict=,
-    preserve=N,
-    ignore_seconds_flag=Y,
-    outdata=
-);
+        dataset             =,
+        new_vars_prefix     =,
+        dtc                 =,
+        highest_imputation  =h,
+        date_imputation     =first,
+        time_imputation     =first,
+        flag_imputation     =auto,
+        min_dates           =,
+        min_dates_strict    =,
+        max_dates           =,
+        max_dates_strict    =,
+        preserve            =N,
+        ignore_seconds_flag =Y,
+        outdata             =
+        );
+    
+    /* Step 1: Initialize macro variables and log arguments */
     %local _error _dsid _rc _dtcnum _vnum _i _j _var _list _n
            _highest _dateimp _timeimp _flagimp _preserve _ignsec
            _dtm _dtf _tmf _make_dtf _make_tmf _existing_dtf
@@ -98,6 +254,8 @@ Latest update Date: 2026-10-18
     %put NOTE: ignore_seconds_flag = %superq(ignore_seconds_flag);
     %put NOTE: outdata             = %superq(outdata);
     %put NOTE: ============================================================;
+
+    /* Step 2: Validate macro arguments */
     %if %superq(dataset)=%then %do;
         %put ERROR: derive_vars_dtm: dataset is required.;
         %let _error=1;
@@ -221,6 +379,8 @@ Latest update Date: 2026-10-18
         %put ERROR: derive_vars_dtm: Validation failed. Macro stopped after parameter validation failure.;
         %return;
     %end;
+
+    /* Step 3: Validate input dataset and variables */
     %if not %sysfunc(exist(&dataset)) %then %do;
         %put ERROR: derive_vars_dtm: Input dataset &dataset does not exist.;
         %return;
@@ -304,6 +464,7 @@ Latest update Date: 2026-10-18
         %return;
     %end;
 
+    /* Step 4: Derive datetime and imputation flags */
     data &outdata;
         set &dataset;
         length _adsk_dtc $80 _adsk_date $10 _adsk_time $12
@@ -351,9 +512,8 @@ Latest update Date: 2026-10-18
                     prxmatch('/^[0-9]{4}---[0-9]{2}$/',strip(_adsk_date)))
                then _adsk_invalid=1;
             if not missing(_adsk_time) then do;
-                if lengthn(_adsk_time) not in (2,5,8) or
-                   not prxmatch('/^[0-9-]{2}(:[0-9-]{2}(:[0-9-]{2})?)?$/',strip(_adsk_time))
-                   then _adsk_invalid=1;
+                if not prxmatch('/^([0-9]{2}|-{1,2})(:([0-9]{2}|-{1,2})(:([0-9]{2}|-{1,2}))?)?$/',
+                                strip(_adsk_time)) then _adsk_invalid=1;
             end;
             if countc(_adsk_dtc,'T')>1 then _adsk_invalid=1;
             if index(_adsk_dtc,'T') and missing(_adsk_time) then _adsk_invalid=1;
@@ -366,17 +526,28 @@ Latest update Date: 2026-10-18
             else if lengthn(_adsk_date)=9 and substr(_adsk_date,5,3)='---' and
                     verify(substr(_adsk_date,8,2),'0123456789')=0 then
                 _adsk_d=input(substr(_adsk_date,8,2),2.);
-            if lengthn(_adsk_time)>=2 and verify(substr(_adsk_time,1,2),'0123456789')=0 then
-                _adsk_h=input(substr(_adsk_time,1,2),2.);
-            if lengthn(_adsk_time)>=5 and verify(substr(_adsk_time,4,2),'0123456789')=0 then
-                _adsk_mi=input(substr(_adsk_time,4,2),2.);
-            if lengthn(_adsk_time)>=8 and verify(substr(_adsk_time,7,2),'0123456789')=0 then
-                _adsk_s=input(substr(_adsk_time,7,2),2.);
+            /* Parse time components by delimiter to preserve partial times. */
+            _adsk_token=scan(_adsk_time,1,':','m');
+            if lengthn(_adsk_token)=2 and verify(strip(_adsk_token),'0123456789')=0 then
+                _adsk_h=input(_adsk_token,2.);
+            _adsk_token=scan(_adsk_time,2,':','m');
+            if lengthn(_adsk_token)=2 and verify(strip(_adsk_token),'0123456789')=0 then
+                _adsk_mi=input(_adsk_token,2.);
+            _adsk_token=scan(_adsk_time,3,':','m');
+            if lengthn(_adsk_token)=2 and verify(strip(_adsk_token),'0123456789')=0 then
+                _adsk_s=input(_adsk_token,2.);
             if not missing(_adsk_mo) and (_adsk_mo<1 or _adsk_mo>12) then _adsk_invalid=1;
             if not missing(_adsk_d) and (_adsk_d<1 or _adsk_d>31) then _adsk_invalid=1;
             if not missing(_adsk_h) and (_adsk_h<0 or _adsk_h>23) then _adsk_invalid=1;
             if not missing(_adsk_mi) and (_adsk_mi<0 or _adsk_mi>59) then _adsk_invalid=1;
             if not missing(_adsk_s) and (_adsk_s<0 or _adsk_s>59) then _adsk_invalid=1;
+            /* Collected seconds are permitted without imputation. */
+            %if &_ignsec=Y and &_eligible>0 %then %do;
+                if not missing(_adsk_s) then do;
+                    put 'ERROR: derive_vars_dtm: Seconds found while ignore_seconds_flag=Y. ' &dtc=;
+                    _adsk_invalid=1;
+                end;
+            %end;
             if not missing(_adsk_y) and (_adsk_y=0 or _adsk_y=9999) then _adsk_invalid=1;
             /* Check month/day using calendar maximum BEFORE calling MDY. */
             if not missing(_adsk_y) and not missing(_adsk_mo) and not missing(_adsk_d)
@@ -391,14 +562,9 @@ Latest update Date: 2026-10-18
                    month(_adsk_dateval) ne _adsk_mo or day(_adsk_dateval) ne _adsk_d
                    then _adsk_invalid=1;
             end;
-            %if &_ignsec=Y %then %do;
-                if not missing(_adsk_s) then do;
-                    put 'ERROR: derive_vars_dtm: Seconds found while ignore_seconds_flag=Y. ' &dtc=;
-                    _adsk_invalid=1;
-                end;
-            %end;
         end;
-        if not _adsk_invalid and not missing(_adsk_dtc) then do;
+        if not _adsk_invalid and
+           (not missing(_adsk_dtc) or &_eligible=7) then do;
             _adsk_iy=_adsk_y;
             _adsk_imo=_adsk_mo;
             _adsk_id=_adsk_d;
@@ -610,6 +776,8 @@ Latest update Date: 2026-10-18
         %end;
         drop _adsk_:;
     run;
+    
+    /* Step 5: Check execution status */
     %if &syserr>4 %then %do;
         %put ERROR: derive_vars_dtm: DATA step failed for &outdata (SYSERR=&syserr).;
         %return;
