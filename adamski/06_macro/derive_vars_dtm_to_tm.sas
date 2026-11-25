@@ -107,7 +107,7 @@ Latest update Date:  2026-11-25
             %let _fmt=%sysfunc(varfmt(&_dsid,&_vn));
             %let _is_time=0;
             %if %length(%superq(_fmt)) %then %do;
-                %if %sysfunc(prxmatch(%str(/^(TIME|TIMEAMPM|HHMM|HOUR|MMSS|E8601TM|B8601TM|IS8601TM|NLTIME)[0-9.]*$/i),%superq(_fmt))) %then %let _is_time=1;
+                %if %sysfunc(prxmatch(%str(/^(TIME|TOD|TIMEAMPM|HHMM|HOUR|MMSS|E8601TM|B8601TM|IS8601TM|NLTIME)[0-9.]*$/i),%superq(_fmt))) %then %let _is_time=1;
             %end;
             %let _times=&_times &_is_time;
         %end;
